@@ -9,7 +9,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let Shader, ShaderObj, ShaderProxy;
-import matrix from 'matrix';
+import matrix from'./matrix';
 
 let defaultExport = {};
 defaultExport.ShaderObj = (ShaderObj = class ShaderObj {});
@@ -109,7 +109,7 @@ defaultExport.Shader = (Shader = class Shader extends ShaderObj {
 
         return this.setSource({common, vertex, fragment});
     }
-    
+
     destroy() {
         this.gl.deleteShader(this.vs);
         this.gl.deleteShader(this.fs);
@@ -162,7 +162,7 @@ defaultExport.Shader = (Shader = class Shader extends ShaderObj {
         }
         return [result.join('\n'), lines];
     }
-    
+
     setSource({common, vertex, fragment}) {
         this.uniformCache = {};
         this.attributeCache = {};
@@ -172,7 +172,7 @@ defaultExport.Shader = (Shader = class Shader extends ShaderObj {
         this.compileShader(this.fs, [common, fragment].join('\n'));
         return this.link();
     }
-    
+
     compileShader(shader, source) {
         let lines;
         source = [boilerplate, source].join('\n');
@@ -186,7 +186,7 @@ defaultExport.Shader = (Shader = class Shader extends ShaderObj {
             throw this.translateError(error, lines);
         }
     }
-    
+
     link() {
         this.gl.linkProgram(this.program);
 
@@ -194,7 +194,7 @@ defaultExport.Shader = (Shader = class Shader extends ShaderObj {
             throw new Error(`Shader Link Error: ${this.gl.getProgramInfoLog(this.program)}`);
         }
     }
-    
+
     translateError(error, lines) {
         const result = ['Shader Compile Error'];
         const iterable = error.split('\n');
@@ -214,7 +214,7 @@ defaultExport.Shader = (Shader = class Shader extends ShaderObj {
 
         return result.join('\n');
     }
-    
+
     attributeLocation(name) {
         let location = this.attributeCache[name];
         if (location === undefined) {
@@ -230,7 +230,7 @@ defaultExport.Shader = (Shader = class Shader extends ShaderObj {
             return location;
         }
     }
-    
+
     uniformLocation(name) {
         let location = this.uniformCache[name];
         if (location === undefined) {
@@ -246,7 +246,7 @@ defaultExport.Shader = (Shader = class Shader extends ShaderObj {
             return location;
         }
     }
-    
+
     use() {
         if (this.gf.currentShader !== this) {
             this.gf.currentShader = this;
@@ -264,10 +264,10 @@ defaultExport.Shader = (Shader = class Shader extends ShaderObj {
             this.use();
             this.gl.uniformMatrix4fv(location, false, value);
         }
-        
+
         return this;
     }
-    
+
     mat3(name, value) {
         if (value instanceof matrix.Mat3) {
             value = value.data;
@@ -278,10 +278,10 @@ defaultExport.Shader = (Shader = class Shader extends ShaderObj {
             this.use();
             this.gl.uniformMatrix3fv(location, false, value);
         }
-        
+
         return this;
     }
-    
+
     vec2(name, a, b) {
         const location = this.uniformLocation(name);
 
@@ -309,7 +309,7 @@ defaultExport.Shader = (Shader = class Shader extends ShaderObj {
         }
         return this;
     }
-    
+
     vec4(name, a, b, c, d) {
         const location = this.uniformLocation(name);
 
@@ -363,7 +363,7 @@ defaultExport.ShaderProxy = (ShaderProxy = class ShaderProxy extends ShaderObj {
         }
         this.shader = shader;
     }
-    
+
     attributeLocation(name) {
         return this.shader.attributeLocation(name);
     }
@@ -391,7 +391,7 @@ defaultExport.ShaderProxy = (ShaderProxy = class ShaderProxy extends ShaderObj {
         this.shader.vec3(name, a, b, c);
         return this;
     }
-    
+
     vec4(name, a, b, c, d) {
         this.shader.vec4(name, a, b, c, d);
         return this;

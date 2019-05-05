@@ -7,9 +7,9 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import WebGLFramework from 'webgl-framework';
-import layer from 'texture-layer';
-import ClipRegion from 'clip';
+import WebGLFramework from'./webgl-framework';
+import layer from'./texture-layer';
+import ClipRegion from'./clip';
 
 class WebGLTextureOverlay {
     constructor() {
@@ -54,12 +54,12 @@ class WebGLTextureOverlay {
         this.map.on('resize', this.resize, this);
         return this.map.on('zoomanim', this.zoomanim, this);
     }
-    
+
     addTo(map) {
         map.addLayer(this);
         return this;
     }
-    
+
     onRemove(map) {
         this.running = false;
 
@@ -84,14 +84,14 @@ class WebGLTextureOverlay {
         this.canvas.width = event.newSize.x;
         return this.canvas.height = event.newSize.y;
     }
-    
+
     zoomanim(event) {
         const scale = this.map.getZoomScale(event.zoom);
         const offset = this.map._getCenterOffset(event.center)._multiplyBy(-scale).subtract(this.map._getMapPanePos());
 
         return this.canvas.style[L.DomUtil.TRANSFORM] = L.DomUtil.getTranslateString(offset) + ` scale(${scale})`;
     }
-    
+
     draw() {
         let dirty;
         if (this.clipRegion != null) {
@@ -108,7 +108,7 @@ class WebGLTextureOverlay {
 
             const sw = bounds.getSouthWest();
             const ne = bounds.getNorthEast();
-            
+
             const screenNorth = this.map.latLngToContainerPoint(ne).y/size.y;
             const screenSouth = this.map.latLngToContainerPoint(sw).y/size.y;
 
@@ -121,7 +121,7 @@ class WebGLTextureOverlay {
             for (layer of Array.from(this.layers)) {
                 layer.draw(southWest, northEast, verticalSize, verticalOffset);
             }
-           
+
             if (this.clipRegion != null) {
                 this.clipRegion.draw(southWest, northEast, verticalSize, verticalOffset);
             }

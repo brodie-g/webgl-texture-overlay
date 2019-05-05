@@ -9,7 +9,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let TextureVideoLayer;
-import BaseLayer from 'base';
+import BaseLayer from'./base';
 
 const exports = (TextureVideoLayer = class TextureVideoLayer extends BaseLayer {
     constructor(parent, params) {
@@ -38,7 +38,7 @@ const exports = (TextureVideoLayer = class TextureVideoLayer extends BaseLayer {
         this.fadeFun = 'crossfade';
         this.interpolationName = 'bell';
         this.shader = this.gf.shader(this.shaders[this.fadeFun][this.interpolationName]);
-        
+
         this.state = this.gf.state({
             shader: this.shader,
             vertexbuffer: {
@@ -50,7 +50,7 @@ const exports = (TextureVideoLayer = class TextureVideoLayer extends BaseLayer {
             //depthTest: true
             //depthWrite: false
             //depthFunc: 'less'
-       
+
         this.texture0 = this.gf.texture2D({
             channels: 'luminance',
             width: 1,
@@ -58,7 +58,7 @@ const exports = (TextureVideoLayer = class TextureVideoLayer extends BaseLayer {
             filter: 'nearest',
             repeat: 'clamp'
         });
-        
+
         this.texture1 = this.gf.texture2D({
             channels: 'luminance',
             width: 1,
@@ -86,7 +86,7 @@ const exports = (TextureVideoLayer = class TextureVideoLayer extends BaseLayer {
             this.setFadeFun(params.fadeFun);
         }
     }
-    
+
     getShadersFadeFun(fadeFun) {
         let name;
         const shaders = {};
@@ -114,7 +114,7 @@ const exports = (TextureVideoLayer = class TextureVideoLayer extends BaseLayer {
 
         return shaders;
     }
-        
+
     updateBitmaps(data) {
         this.bitmaps = data.bitmaps;
 
@@ -185,14 +185,14 @@ const exports = (TextureVideoLayer = class TextureVideoLayer extends BaseLayer {
             return this.state.draw();
         }
     }
-   
+
     //# public interface ##
     setData(data) {
         this.parent.dirty = true;
-        
+
         this.width = data.width;
         this.height = data.height;
-        
+
         this.projection = proj4(
             new proj4.Proj(data.projection),
             new proj4.Proj('WGS84')

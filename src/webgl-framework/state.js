@@ -11,11 +11,11 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let State;
-import util from 'util';
+import util from'./util';
 
-import VertexBuffer from 'vertexbuffer';
-import { ShaderObj } from 'shader';
-import framebuffer from 'framebuffer';
+import VertexBuffer from'./vertexbuffer';
+import { ShaderObj } from'./shader';
+import framebuffer from'./framebuffer';
 
 const exports = (State = class State {
     constructor(gf, params) {
@@ -147,7 +147,7 @@ const exports = (State = class State {
             return this.gf.vao.deleteVertexArrayOES(this.vao);
         }
     }
-        
+
     blendAlpha() {
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         return this.gl.enable(this.gl.BLEND);
@@ -240,7 +240,7 @@ const exports = (State = class State {
                 this.gl.lineWidth(this.lineWidth);
             }
         }
-        
+
         this.shader.use();
 
         this.setupVertexBuffer();
@@ -254,7 +254,7 @@ const exports = (State = class State {
         } else {
             this.setViewport();
         }
-        
+
         if (this.framebuffer != null) {
             this.framebuffer.use();
         } else {
@@ -262,13 +262,13 @@ const exports = (State = class State {
                 this.gf.currentFramebuffer.unuse();
             }
         }
-        
+
         for (let unit = 0; unit < this.textures.length; unit++) { //FIXME
             const texture = this.textures[unit];
             texture.texture.bind(unit);
             this.int(texture.name, unit);
         }
-        
+
         if (this.gf.currentState !== this) {
             this.setupState();
         }
@@ -282,7 +282,7 @@ const exports = (State = class State {
         this.shader.mat4(name, value);
         return this;
     }
-    
+
     mat3(name, value) {
         this.shader.mat3(name, value);
         return this;
@@ -292,7 +292,7 @@ const exports = (State = class State {
         this.shader.int(name, value);
         return this;
     }
-    
+
     vec2(name, a, b) {
         this.shader.vec2(name, a, b);
         return this;
@@ -302,7 +302,7 @@ const exports = (State = class State {
         this.shader.vec3(name, a, b, c);
         return this;
     }
-    
+
     vec4(name, a, b, c, d) {
         this.shader.vec4(name, a, b, c, d);
         return this;

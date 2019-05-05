@@ -8,7 +8,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let Framebuffer, FramebufferCube;
-import texture from 'texture';
+import texture from'./texture';
 
 let defaultExport = {};
 defaultExport.Framebuffer = (Framebuffer = class Framebuffer {
@@ -26,12 +26,12 @@ defaultExport.Framebuffer = (Framebuffer = class Framebuffer {
     anisotropy() {
         return this.colorTexture.anisotropy();
     }
-    
+
     bind(unit) {
         if (unit == null) { unit = 0; }
         return this.colorTexture.bind(unit);
     }
-    
+
     check() {
         const result = this.gl.checkFramebufferStatus(this.gl.FRAMEBUFFER);
         switch (result) {
@@ -50,7 +50,7 @@ defaultExport.Framebuffer = (Framebuffer = class Framebuffer {
         }
         return this;
     }
-    
+
     unuse() {
         if (this.gf.currentFramebuffer != null) {
             this.gf.currentFramebuffer = null;
@@ -59,7 +59,7 @@ defaultExport.Framebuffer = (Framebuffer = class Framebuffer {
         return this;
     }
 });
-    
+
 defaultExport.Framebuffer2D = (Framebuffer = class Framebuffer extends defaultExport.Framebuffer {
     constructor(gf, params) {
         {
@@ -93,7 +93,7 @@ defaultExport.Framebuffer2D = (Framebuffer = class Framebuffer extends defaultEx
         this.unuse();
         return this;
     }
-    
+
     use() {
         if (this.gf.currentFramebuffer !== this) {
             this.gf.currentFramebuffer = this;
@@ -107,7 +107,7 @@ defaultExport.Framebuffer2D = (Framebuffer = class Framebuffer extends defaultEx
         if (height == null) { ({ height } = this.colorTexture); }
         return this.gl.viewport(0, 0, width, height);
     }
-    
+
     destroy() {
         this.gl.deleteFramebuffer(this.buffer);
         if (this.ownColor) {
@@ -138,7 +138,7 @@ defaultExport.FramebufferCube = (FramebufferCube = class FramebufferCube extends
         this.positiveZ = new defaultExport.Framebuffer2D(this.gf);
 
         this.currentSide = this.negativeX;
-        
+
         const { color } = params;
         if (color != null) {
             if (params.color instanceof texture.Texture) {
@@ -175,7 +175,7 @@ defaultExport.FramebufferCube = (FramebufferCube = class FramebufferCube extends
     use() {
         return this.currentSide.use();
     }
-    
+
     viewport(width, height) {
         if (width == null) { width = this.colorTexture.size; }
         if (height == null) { height = this.colorTexture.size; }
@@ -183,4 +183,4 @@ defaultExport.FramebufferCube = (FramebufferCube = class FramebufferCube extends
     }
 });
 export default defaultExport;
-    
+

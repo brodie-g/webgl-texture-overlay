@@ -9,14 +9,14 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let VertexBuffer;
-import util from 'util';
+import util from'./util';
 
 const exports = (VertexBuffer = class VertexBuffer {
     constructor(gf, {pointers, vertices, mode, stride}) {
         this.gf = gf;
         this.gl = this.gf.gl;
         this.buffer = this.gl.createBuffer();
-        
+
         if (mode != null) {
             this.mode = this.gl[mode.toUpperCase()];
         } else {
@@ -24,7 +24,7 @@ const exports = (VertexBuffer = class VertexBuffer {
         }
 
         let offset = 0;
-        
+
         this.pointers = (() => {
             const result = [];
             for (let pointer of Array.from(pointers)) {
@@ -65,7 +65,7 @@ const exports = (VertexBuffer = class VertexBuffer {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
         return this;
     }
-    
+
     bind() {
         // does not seem to work correctly
         //if @gf.currentVertexbuffer isnt @
@@ -81,7 +81,7 @@ const exports = (VertexBuffer = class VertexBuffer {
             return this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
         }
     }
-    
+
     draw(first, count) {
         if (first == null) { first = 0; }
         if (count == null) { ({ count } = this); }
