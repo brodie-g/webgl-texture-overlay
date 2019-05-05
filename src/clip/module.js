@@ -1,96 +1,133 @@
-exports = class ClipRegion
-    constructor: (@gf, @overlay) ->
-        @fill = @gf.state
-            shader: fs.open('fill.shader')
-            colorWrite: [false, false, false, true]
-            vertexbuffer:
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS202: Simplify dynamic range loops
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let ClipRegion;
+const exports = (ClipRegion = class ClipRegion {
+    constructor(gf, overlay) {
+        this.gf = gf;
+        this.overlay = overlay;
+        this.fill = this.gf.state({
+            shader: fs.open('fill.shader'),
+            colorWrite: [false, false, false, true],
+            vertexbuffer: {
                 pointers: [
                     {name:'position', size:2}
                 ]
+            }});
         
-        @holes = @gf.state
-            shader: fs.open('holes.shader')
-            colorWrite: [false, false, false, true]
-            vertexbuffer:
+        this.holes = this.gf.state({
+            shader: fs.open('holes.shader'),
+            colorWrite: [false, false, false, true],
+            vertexbuffer: {
                 pointers: [
                     {name:'position', size:2}
                 ]
+            }});
         
-        @clear = @gf.state
-            shader: fs.open('clear.shader')
-            colorWrite: [false, false, false, true]
+        this.clear = this.gf.state({
+            shader: fs.open('clear.shader'),
+            colorWrite: [false, false, false, true]});
 
-        @dirty = false
+        this.dirty = false;
+    }
 
-    check: ->
-        if @dirty and @overlay.map? and @data?
-            @tessellate()
-            return true
-        else
-            return false
+    check() {
+        if (this.dirty && (this.overlay.map != null) && (this.data != null)) {
+            this.tessellate();
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-    draw: (southWest, northEast, verticalSize, verticalOffset) ->
-        @clear.draw()
+    draw(southWest, northEast, verticalSize, verticalOffset) {
+        this.clear.draw();
 
-        @fill
+        this.fill
             .float('verticalSize', verticalSize)
             .float('verticalOffset', verticalOffset)
             .vec2('slippyBounds.southWest', southWest.x, southWest.y)
             .vec2('slippyBounds.northEast', northEast.x, northEast.y)
-            .draw()
+            .draw();
         
-        @holes
+        return this.holes
             .float('verticalSize', verticalSize)
             .float('verticalOffset', verticalOffset)
             .vec2('slippyBounds.southWest', southWest.x, southWest.y)
             .vec2('slippyBounds.northEast', northEast.x, northEast.y)
-            .draw()
+            .draw();
+    }
 
-    set: (@data) ->
-        @dirty = true
+    set(data) {
+        this.data = data;
+        return this.dirty = true;
+    }
 
-    project: (coords) ->
-        result = new Float32Array(coords.length*2)
-        for item, i in coords
-            {x,y} = @overlay.map.project({lat:item[1], lng:item[0]}, 0).divideBy(256)
-            result[i*2+0] = x
-            result[i*2+1] = y
-        return result
+    project(coords) {
+        const result = new Float32Array(coords.length*2);
+        for (let i = 0; i < coords.length; i++) {
+            const item = coords[i];
+            const {x,y} = this.overlay.map.project({lat:item[1], lng:item[0]}, 0).divideBy(256);
+            result[(i*2)+0] = x;
+            result[(i*2)+1] = y;
+        }
+        return result;
+    }
 
-    tessellateCoords: (coords) ->
-        mesh = tessellate.tessellate([@project(coords)])
-        vertices = new Float32Array(mesh.triangles.length*2)
-        for idx, i in mesh.triangles
-            vertices[i*2+0] = mesh.vertices[idx*2+0]
-            vertices[i*2+1] = mesh.vertices[idx*2+1]
-        return vertices
+    tessellateCoords(coords) {
+        const mesh = tessellate.tessellate([this.project(coords)]);
+        const vertices = new Float32Array(mesh.triangles.length*2);
+        for (let i = 0; i < mesh.triangles.length; i++) {
+            const idx = mesh.triangles[i];
+            vertices[(i*2)+0] = mesh.vertices[(idx*2)+0];
+            vertices[(i*2)+1] = mesh.vertices[(idx*2)+1];
+        }
+        return vertices;
+    }
 
-    collate: (arrays) ->
-        length = 0
-        for array in arrays
-            length += array.length
-        result = new Float32Array(length)
-        offset = 0
-        for array in arrays
-            result.set array, offset
-            offset += array.length
-        return result
+    collate(arrays) {
+        let array;
+        let length = 0;
+        for (array of Array.from(arrays)) {
+            length += array.length;
+        }
+        const result = new Float32Array(length);
+        let offset = 0;
+        for (array of Array.from(arrays)) {
+            result.set(array, offset);
+            offset += array.length;
+        }
+        return result;
+    }
 
-    tessellate: ->
-        @dirty = false
-        startTime = performance.now()
-        fills = []
-        holes = []
-        if typeof @data[0][0][0] is 'number'
-            regions = [@data]
-        else
-            regions = @data
-        for region, i in regions
-            fills.push @tessellateCoords(region[0])
+    tessellate() {
+        let regions;
+        this.dirty = false;
+        const startTime = performance.now();
+        const fills = [];
+        const holes = [];
+        if (typeof this.data[0][0][0] === 'number') {
+            regions = [this.data];
+        } else {
+            regions = this.data;
+        }
+        for (let j = 0, i = j; j < regions.length; j++, i = j) {
+            var asc, end;
+            const region = regions[i];
+            fills.push(this.tessellateCoords(region[0]));
 
-            for i in [1...region.length]
-                holes.push @tessellateCoords(region[i])
+            for (i = 1, end = region.length, asc = 1 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
+                holes.push(this.tessellateCoords(region[i]));
+            }
+        }
 
-        @fill.vertices @collate(fills)
-        @holes.vertices @collate(holes)
-        #console.log performance.now() - startTime
+        this.fill.vertices(this.collate(fills));
+        return this.holes.vertices(this.collate(holes));
+    }
+});
+        //console.log performance.now() - startTime

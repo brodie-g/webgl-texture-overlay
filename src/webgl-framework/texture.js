@@ -1,178 +1,268 @@
-exports.Texture = class Texture
+/*
+ * decaffeinate suggestions:
+ * DS001: Remove Babel/TypeScript constructor workaround
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS104: Avoid inline assignments
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let Texture, Texture2D, TextureCube;
+let defaultExport = {};
+defaultExport.Texture = (Texture = class Texture {});
 
-class ConcreteTexture extends exports.Texture
-    constructor: (@gf, params={}) ->
-        @gl = @gf.gl
-        @handle = @gl.createTexture()
-        @channels = @gl[(params.channels ? 'rgba').toUpperCase()]
-        @bind()
+class ConcreteTexture extends defaultExport.Texture {
+    constructor(gf, params) {
+        {
+          // Hack: trick Babel/TypeScript into allowing this before super.
+          if (false) { super(); }
+          let thisFn = (() => { return this; }).toString();
+          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
+          eval(`${thisName} = this;`);
+        }
+        this.gf = gf;
+        if (params == null) { params = {}; }
+        this.gl = this.gf.gl;
+        this.handle = this.gl.createTexture();
+        this.channels = this.gl[(params.channels != null ? params.channels : 'rgba').toUpperCase()];
+        this.bind();
 
-        if typeof params.type == 'string'
-            @type = @gl[(params.type ? 'unsigned_byte').toUpperCase()]
-        else
-            @type = params.type ? @gl.UNSIGNED_BYTE
+        if (typeof params.type === 'string') {
+            this.type = this.gl[(params.type != null ? params.type : 'unsigned_byte').toUpperCase()];
+        } else {
+            this.type = params.type != null ? params.type : this.gl.UNSIGNED_BYTE;
+        }
 
-        filter = params.filter ? 'nearest'
-        if typeof filter == 'string'
-            @[filter]()
-        else
-            @minify = @gl[filter.minify.toUpperCase()] ? @gl.LINEAR
-            @magnify = @gl[filter.magnify.toUpperCase()] ? @gl.LINEAR
-            @gl.texParameteri @target, @gl.TEXTURE_MAG_FILTER, @magnify
-            @gl.texParameteri @target, @gl.TEXTURE_MIN_FILTER, @minify
+        const filter = params.filter != null ? params.filter : 'nearest';
+        if (typeof filter === 'string') {
+            this[filter]();
+        } else {
+            let left, left1;
+            this.minify = (left = this.gl[filter.minify.toUpperCase()]) != null ? left : this.gl.LINEAR;
+            this.magnify = (left1 = this.gl[filter.magnify.toUpperCase()]) != null ? left1 : this.gl.LINEAR;
+            this.gl.texParameteri(this.target, this.gl.TEXTURE_MAG_FILTER, this.magnify);
+            this.gl.texParameteri(this.target, this.gl.TEXTURE_MIN_FILTER, this.minify);
+        }
 
-        clamp = params.clamp ? 'edge'
-        if typeof clamp == 'string'
-            @[clamp]()
-        else
-            if clamp.s == 'edge'
-                sClamp = @gl.CLAMP_TO_EDGE
-            else if clamp.s == 'repeat'
-                sClamp = @gl.REPEAT
-            else
-                throw new Error('unknown S clamp mode: ' + clamp.s)
+        const clamp = params.clamp != null ? params.clamp : 'edge';
+        if (typeof clamp === 'string') {
+            this[clamp]();
+        } else {
+            let sClamp, tClamp;
+            if (clamp.s === 'edge') {
+                sClamp = this.gl.CLAMP_TO_EDGE;
+            } else if (clamp.s === 'repeat') {
+                sClamp = this.gl.REPEAT;
+            } else {
+                throw new Error(`unknown S clamp mode: ${clamp.s}`);
+            }
             
-            if clamp.t == 'edge'
-                tClamp = @gl.CLAMP_TO_EDGE
-            else if clamp.t == 'repeat'
-                tClamp = @gl.REPEAT
-            else
-                throw new Error('unknown T clamp mode: ' + clamp.t)
+            if (clamp.t === 'edge') {
+                tClamp = this.gl.CLAMP_TO_EDGE;
+            } else if (clamp.t === 'repeat') {
+                tClamp = this.gl.REPEAT;
+            } else {
+                throw new Error(`unknown T clamp mode: ${clamp.t}`);
+            }
 
-            @gl.texParameteri @target, @gl.TEXTURE_WRAP_S, sClamp
-            @gl.texParameteri @target, @gl.TEXTURE_WRAP_T, tClamp
+            this.gl.texParameteri(this.target, this.gl.TEXTURE_WRAP_S, sClamp);
+            this.gl.texParameteri(this.target, this.gl.TEXTURE_WRAP_T, tClamp);
+        }
+    }
 
-    destroy: ->
-        @gl.deleteTexture @handle
+    destroy() {
+        return this.gl.deleteTexture(this.handle);
+    }
     
-    generateMipmap: ->
-        @mipmapped = true
-        @bind()
-        @gl.generateMipmap(@target)
-        return @
+    generateMipmap() {
+        this.mipmapped = true;
+        this.bind();
+        this.gl.generateMipmap(this.target);
+        return this;
+    }
     
-    anisotropy: ->
-        @anisotropic = true
-        ext = @gl.getExtension 'EXT_texture_filter_anisotropic'
-        if ext
-            max = @gl.getParameter ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT
-            @gl.texParameterf @target, ext.TEXTURE_MAX_ANISOTROPY_EXT, max
+    anisotropy() {
+        this.anisotropic = true;
+        const ext = this.gl.getExtension('EXT_texture_filter_anisotropic');
+        if (ext) {
+            const max = this.gl.getParameter(ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+            return this.gl.texParameterf(this.target, ext.TEXTURE_MAX_ANISOTROPY_EXT, max);
+        }
+    }
     
-    linear: ->
-        @bind()
+    linear() {
+        this.bind();
 
-        @gl.texParameteri @target, @gl.TEXTURE_MAG_FILTER, @gl.LINEAR
-        @gl.texParameteri @target, @gl.TEXTURE_MIN_FILTER, @gl.LINEAR
-        return @
+        this.gl.texParameteri(this.target, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
+        this.gl.texParameteri(this.target, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+        return this;
+    }
     
-    nearest: ->
-        @bind()
+    nearest() {
+        this.bind();
 
-        @gl.texParameteri @target, @gl.TEXTURE_MAG_FILTER, @gl.NEAREST
-        @gl.texParameteri @target, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST
-        return @
+        this.gl.texParameteri(this.target, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
+        this.gl.texParameteri(this.target, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+        return this;
+    }
     
-    repeat: ->
-        @bind()
+    repeat() {
+        this.bind();
 
-        @gl.texParameteri @target, @gl.TEXTURE_WRAP_S, @gl.REPEAT
-        @gl.texParameteri @target, @gl.TEXTURE_WRAP_T, @gl.REPEAT
-        return @
+        this.gl.texParameteri(this.target, this.gl.TEXTURE_WRAP_S, this.gl.REPEAT);
+        this.gl.texParameteri(this.target, this.gl.TEXTURE_WRAP_T, this.gl.REPEAT);
+        return this;
+    }
     
-    edge: ->
-        @bind()
+    edge() {
+        this.bind();
 
-        @gl.texParameteri @target, @gl.TEXTURE_WRAP_S, @gl.CLAMP_TO_EDGE
-        @gl.texParameteri @target, @gl.TEXTURE_WRAP_T, @gl.CLAMP_TO_EDGE
-        return @
+        this.gl.texParameteri(this.target, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+        this.gl.texParameteri(this.target, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+        return this;
+    }
     
-    bind: (unit=0) ->
-        @gl.activeTexture @gl.TEXTURE0+unit
-        @gl.bindTexture @target, @handle
-        return @
+    bind(unit) {
+        if (unit == null) { unit = 0; }
+        this.gl.activeTexture(this.gl.TEXTURE0+unit);
+        this.gl.bindTexture(this.target, this.handle);
+        return this;
+    }
+}
 
-class CubeSide extends exports.Texture
-    constructor: (@handle, @target) ->
+class CubeSide extends defaultExport.Texture {
+    constructor(handle, target) {
+        {
+          // Hack: trick Babel/TypeScript into allowing this before super.
+          if (false) { super(); }
+          let thisFn = (() => { return this; }).toString();
+          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
+          eval(`${thisName} = this;`);
+        }
+        this.handle = handle;
+        this.target = target;
+    }
+}
 
-exports.TextureCube = class TextureCube extends ConcreteTexture
-    constructor: (@gf, params={}) ->
-        @target = @gf.gl.TEXTURE_CUBE_MAP
-        super(@gf, params)
-        @negativeX = new CubeSide(@handle, @gl.TEXTURE_CUBE_MAP_NEGATIVE_X)
-        @negativeY = new CubeSide(@handle, @gl.TEXTURE_CUBE_MAP_NEGATIVE_Y)
-        @negativeZ = new CubeSide(@handle, @gl.TEXTURE_CUBE_MAP_NEGATIVE_Z)
-        @positiveX = new CubeSide(@handle, @gl.TEXTURE_CUBE_MAP_POSITIVE_X)
-        @positiveY = new CubeSide(@handle, @gl.TEXTURE_CUBE_MAP_POSITIVE_Y)
-        @positiveZ = new CubeSide(@handle, @gl.TEXTURE_CUBE_MAP_POSITIVE_Z)
+defaultExport.TextureCube = (TextureCube = class TextureCube extends ConcreteTexture {
+    constructor(gf, params) {
+        {
+          // Hack: trick Babel/TypeScript into allowing this before super.
+          if (false) { super(); }
+          let thisFn = (() => { return this; }).toString();
+          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
+          eval(`${thisName} = this;`);
+        }
+        this.gf = gf;
+        if (params == null) { params = {}; }
+        this.target = this.gf.gl.TEXTURE_CUBE_MAP;
+        super(this.gf, params);
+        this.negativeX = new CubeSide(this.handle, this.gl.TEXTURE_CUBE_MAP_NEGATIVE_X);
+        this.negativeY = new CubeSide(this.handle, this.gl.TEXTURE_CUBE_MAP_NEGATIVE_Y);
+        this.negativeZ = new CubeSide(this.handle, this.gl.TEXTURE_CUBE_MAP_NEGATIVE_Z);
+        this.positiveX = new CubeSide(this.handle, this.gl.TEXTURE_CUBE_MAP_POSITIVE_X);
+        this.positiveY = new CubeSide(this.handle, this.gl.TEXTURE_CUBE_MAP_POSITIVE_Y);
+        this.positiveZ = new CubeSide(this.handle, this.gl.TEXTURE_CUBE_MAP_POSITIVE_Z);
 
-        @size params.size
+        this.size(params.size);
         
-        if @minify in [@gl.NEAREST_MIPMAP_NEAREST, @gl.LINEAR_MIPMAP_NEAREST, @gl.NEAREST_MIPMAP_LINEAR, @gl.LINEAR_MIPMAP_LINEAR]
-            @generateMipmap()
+        if ([this.gl.NEAREST_MIPMAP_NEAREST, this.gl.LINEAR_MIPMAP_NEAREST, this.gl.NEAREST_MIPMAP_LINEAR, this.gl.LINEAR_MIPMAP_LINEAR].includes(this.minify)) {
+            this.generateMipmap();
+        }
+    }
 
-    size: (@size) ->
-        @bind()
-        @gl.texImage2D @gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, @channels, @size, @size, 0, @channels, @type, null
-        @gl.texImage2D @gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, @channels, @size, @size, 0, @channels, @type, null
-        @gl.texImage2D @gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, @channels, @size, @size, 0, @channels, @type, null
-        @gl.texImage2D @gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, @channels, @size, @size, 0, @channels, @type, null
-        @gl.texImage2D @gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, @channels, @size, @size, 0, @channels, @type, null
-        @gl.texImage2D @gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, @channels, @size, @size, 0, @channels, @type, null
+    size(size) {
+        this.size = size;
+        this.bind();
+        this.gl.texImage2D(this.gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, this.channels, this.size, this.size, 0, this.channels, this.type, null);
+        this.gl.texImage2D(this.gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, this.channels, this.size, this.size, 0, this.channels, this.type, null);
+        this.gl.texImage2D(this.gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, this.channels, this.size, this.size, 0, this.channels, this.type, null);
+        this.gl.texImage2D(this.gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, this.channels, this.size, this.size, 0, this.channels, this.type, null);
+        this.gl.texImage2D(this.gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, this.channels, this.size, this.size, 0, this.channels, this.type, null);
+        this.gl.texImage2D(this.gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, this.channels, this.size, this.size, 0, this.channels, this.type, null);
 
-        return @
+        return this;
+    }
     
-    dataSized: (data, side, @size) ->
-        @bind()
-        @gl.texImage2D @[side].target, 0, @channels, @size, @size, 0, @channels, @type, data
-        return @
+    dataSized(data, side, size) {
+        this.size = size;
+        this.bind();
+        this.gl.texImage2D(this[side].target, 0, this.channels, this.size, this.size, 0, this.channels, this.type, data);
+        return this;
+    }
+});
 
-exports.Texture2D = class Texture2D extends ConcreteTexture
-    constructor: (@gf, params={}) ->
-        @target = @gf.gl.TEXTURE_2D
-        super(@gf, params)
+defaultExport.Texture2D = (Texture2D = class Texture2D extends ConcreteTexture {
+    constructor(gf, params) {
+        {
+          // Hack: trick Babel/TypeScript into allowing this before super.
+          if (false) { super(); }
+          let thisFn = (() => { return this; }).toString();
+          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
+          eval(`${thisName} = this;`);
+        }
+        this.gf = gf;
+        if (params == null) { params = {}; }
+        this.target = this.gf.gl.TEXTURE_2D;
+        super(this.gf, params);
 
-        if params.data instanceof Image
-            @dataImage params.data
-        else if params.width? and params.height?
-            if params.data?
-                @dataSized params.data, params.width, params.height
-            else
-                @size params.width, params.height
+        if (params.data instanceof Image) {
+            this.dataImage(params.data);
+        } else if ((params.width != null) && (params.height != null)) {
+            if (params.data != null) {
+                this.dataSized(params.data, params.width, params.height);
+            } else {
+                this.size(params.width, params.height);
+            }
+        }
 
-        if @minify in [@gl.NEAREST_MIPMAP_NEAREST, @gl.LINEAR_MIPMAP_NEAREST, @gl.NEAREST_MIPMAP_LINEAR, @gl.LINEAR_MIPMAP_LINEAR]
-            @generateMipmap()
+        if ([this.gl.NEAREST_MIPMAP_NEAREST, this.gl.LINEAR_MIPMAP_NEAREST, this.gl.NEAREST_MIPMAP_LINEAR, this.gl.LINEAR_MIPMAP_LINEAR].includes(this.minify)) {
+            this.generateMipmap();
+        }
+    }
 
-    loadImage: (url) ->
-        image = new Image()
-        image.onload = =>
-            @dataImage image
-        image.src = url
+    loadImage(url) {
+        const image = new Image();
+        image.onload = () => {
+            return this.dataImage(image);
+        };
+        return image.src = url;
+    }
 
-    dataImage: (data) ->
-        @bind()
+    dataImage(data) {
+        this.bind();
 
-        @width = data.width
-        @height = data.height
-        @gl.texImage2D @target, 0, @channels, @channels, @type, data
-        return @
+        this.width = data.width;
+        this.height = data.height;
+        this.gl.texImage2D(this.target, 0, this.channels, this.channels, this.type, data);
+        return this;
+    }
     
-    dataSized: (data, width, height, unpackAlignment=1) ->
-        @bind()
+    dataSized(data, width, height, unpackAlignment) {
+        if (unpackAlignment == null) { unpackAlignment = 1; }
+        this.bind();
 
-        @width = width
-        @height = height
+        this.width = width;
+        this.height = height;
 
-        @gl.pixelStorei @gl.UNPACK_ALIGNMENT, unpackAlignment
-        @gl.texImage2D @target, 0, @channels, @width, @height, 0, @channels, @type, data
-        return @
+        this.gl.pixelStorei(this.gl.UNPACK_ALIGNMENT, unpackAlignment);
+        this.gl.texImage2D(this.target, 0, this.channels, this.width, this.height, 0, this.channels, this.type, data);
+        return this;
+    }
 
-    size: (@width, @height) ->
-        @bind()
-        @gl.texImage2D @target, 0, @channels, @width, @height, 0, @channels, @type, null
-        return @
+    size(width, height) {
+        this.width = width;
+        this.height = height;
+        this.bind();
+        this.gl.texImage2D(this.target, 0, this.channels, this.width, this.height, 0, this.channels, this.type, null);
+        return this;
+    }
     
-    draw: (scale=1) ->
-        @gf.blit
+    draw(scale) {
+        if (scale == null) { scale = 1; }
+        return this.gf.blit
             .float('scale', scale)
-            .sampler('source', @)
-            .draw()
+            .sampler('source', this)
+            .draw();
+    }
+});
+export default defaultExport;

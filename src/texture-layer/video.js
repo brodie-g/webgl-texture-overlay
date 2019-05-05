@@ -1,205 +1,256 @@
-BaseLayer = require 'base'
+/*
+ * decaffeinate suggestions:
+ * DS001: Remove Babel/TypeScript constructor workaround
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS202: Simplify dynamic range loops
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let TextureVideoLayer;
+import BaseLayer from 'base';
 
-exports = class TextureVideoLayer extends BaseLayer
-    constructor: (@parent, params={}) ->
-        @gf = @parent.gf
-        @map = @parent.map
-        @haveData = false
-        @haveColormap = false
-        @mixFactor = 0
-        @time = 0
-
-        @shaders = {
-            'crossfade': @getShadersFadeFun 'crossfade'
-            'dissolve': @getShadersFadeFun 'dissolve'
-            'noise': @getShadersFadeFun 'noise'
-            'fbm': @getShadersFadeFun 'fbm'
+const exports = (TextureVideoLayer = class TextureVideoLayer extends BaseLayer {
+    constructor(parent, params) {
+        {
+          // Hack: trick Babel/TypeScript into allowing this before super.
+          if (false) { super(); }
+          let thisFn = (() => { return this; }).toString();
+          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
+          eval(`${thisName} = this;`);
         }
-        @fadeFun = 'crossfade'
-        @interpolationName = 'bell'
-        @shader = @gf.shader(@shaders[@fadeFun][@interpolationName])
+        this.parent = parent;
+        if (params == null) { params = {}; }
+        this.gf = this.parent.gf;
+        this.map = this.parent.map;
+        this.haveData = false;
+        this.haveColormap = false;
+        this.mixFactor = 0;
+        this.time = 0;
+
+        this.shaders = {
+            'crossfade': this.getShadersFadeFun('crossfade'),
+            'dissolve': this.getShadersFadeFun('dissolve'),
+            'noise': this.getShadersFadeFun('noise'),
+            'fbm': this.getShadersFadeFun('fbm')
+        };
+        this.fadeFun = 'crossfade';
+        this.interpolationName = 'bell';
+        this.shader = this.gf.shader(this.shaders[this.fadeFun][this.interpolationName]);
         
-        @state = @gf.state
-            shader: @shader
-            vertexbuffer:
+        this.state = this.gf.state({
+            shader: this.shader,
+            vertexbuffer: {
                 pointers: [
-                    {name:'position', size:2}
+                    {name:'position', size:2},
                     {name:'texcoord', size:2}
                 ]
-            #depthTest: true
-            #depthWrite: false
-            #depthFunc: 'less'
+            }});
+            //depthTest: true
+            //depthWrite: false
+            //depthFunc: 'less'
        
-        @texture0 = @gf.texture2D
-            channels: 'luminance'
-            width: 1
-            height: 1
-            filter: 'nearest'
+        this.texture0 = this.gf.texture2D({
+            channels: 'luminance',
+            width: 1,
+            height: 1,
+            filter: 'nearest',
             repeat: 'clamp'
+        });
         
-        @texture1 = @gf.texture2D
-            channels: 'luminance'
-            width: 1
-            height: 1
-            filter: 'nearest'
+        this.texture1 = this.gf.texture2D({
+            channels: 'luminance',
+            width: 1,
+            height: 1,
+            filter: 'nearest',
             repeat: 'clamp'
+        });
 
-        if params.colormap?
-            @setColormap params.colormap
+        if (params.colormap != null) {
+            this.setColormap(params.colormap);
+        }
 
-        if params.data?
-            @setData params.data
+        if (params.data != null) {
+            this.setData(params.data);
+        }
 
-        if params.interpolation?
-            if params.fadeFun?
-                @fadeFun = params.fadeFun
+        if (params.interpolation != null) {
+            if (params.fadeFun != null) {
+                this.fadeFun = params.fadeFun;
+            }
 
-            @setInterpolation params.interpolation
+            this.setInterpolation(params.interpolation);
 
-        else if params.fadeFun?
-            @setFadeFun params.fadeFun
+        } else if (params.fadeFun != null) {
+            this.setFadeFun(params.fadeFun);
+        }
+    }
     
-    getShadersFadeFun: (fadeFun) ->
-        shaders = {}
+    getShadersFadeFun(fadeFun) {
+        let name;
+        const shaders = {};
 
-        for name in ['nearest', 'lerp', 'smoothstep', 'euclidian', 'classicBicubic', 'hex-nearest', 'hex-linear', 'hex-smoothstep']
+        for (name of ['nearest', 'lerp', 'smoothstep', 'euclidian', 'classicBicubic', 'hex-nearest', 'hex-linear', 'hex-smoothstep']) {
             shaders[name] = [
-                fs.open("texfuns/tween/#{fadeFun}.shader")
-                fs.open('texfuns/intensity.shader')
-                fs.open('texfuns/interpolation/rect.shader')
-                fs.open("texfuns/interpolation/#{name}.shader")
+                fs.open(`texfuns/tween/${fadeFun}.shader`),
+                fs.open('texfuns/intensity.shader'),
+                fs.open('texfuns/interpolation/rect.shader'),
+                fs.open(`texfuns/interpolation/${name}.shader`),
                 fs.open('display.shader')
-            ]
+            ];
+        }
 
-        for name in ['bicubicLinear', 'polynom6th', 'bicubicSmoothstep', 'bspline', 'bell', 'catmull-rom']
+        for (name of ['bicubicLinear', 'polynom6th', 'bicubicSmoothstep', 'bspline', 'bell', 'catmull-rom']) {
             shaders[name] = [
-                fs.open("texfuns/tween/#{fadeFun}.shader")
-                fs.open('texfuns/intensity.shader')
-                fs.open('texfuns/interpolation/rect.shader')
-                fs.open("texfuns/interpolation/#{name}.shader")
-                fs.open("texfuns/interpolation/generalBicubic.shader")
+                fs.open(`texfuns/tween/${fadeFun}.shader`),
+                fs.open('texfuns/intensity.shader'),
+                fs.open('texfuns/interpolation/rect.shader'),
+                fs.open(`texfuns/interpolation/${name}.shader`),
+                fs.open("texfuns/interpolation/generalBicubic.shader"),
                 fs.open('display.shader')
-            ]
+            ];
+        }
 
-        return shaders
+        return shaders;
+    }
         
-    updateBitmaps: (data) ->
-        @bitmaps = data.bitmaps
+    updateBitmaps(data) {
+        this.bitmaps = data.bitmaps;
 
-        @firstFrame = @bitmaps[0]
-        @lastFrame = @bitmaps[@bitmaps.length-1]
+        this.firstFrame = this.bitmaps[0];
+        this.lastFrame = this.bitmaps[this.bitmaps.length-1];
 
-        @frame0 = @bitmaps[0]
-        @frame1 = @bitmaps[1%@bitmaps.length]
+        this.frame0 = this.bitmaps[0];
+        this.frame1 = this.bitmaps[1%this.bitmaps.length];
 
-        @mixFactor = 0
-        @time = 0
-        @texture0.dataSized @frame0.bitmap, @width, @height, 1
-        @texture1.dataSized @frame1.bitmap, @width, @height, 1
+        this.mixFactor = 0;
+        this.time = 0;
+        this.texture0.dataSized(this.frame0.bitmap, this.width, this.height, 1);
+        return this.texture1.dataSized(this.frame1.bitmap, this.width, this.height, 1);
+    }
 
-        #min = max = data.bitmaps[0].bitmap[0]
-        #for bitmap in data.bitmaps
-        #    for value in bitmap.bitmap
-        #        min = Math.min min, value
-        #        max = Math.max max, value
+        //min = max = data.bitmaps[0].bitmap[0]
+        //for bitmap in data.bitmaps
+        //    for value in bitmap.bitmap
+        //        min = Math.min min, value
+        //        max = Math.max max, value
 
-    draw: (southWest, northEast, verticalSize, verticalOffset) ->
-        if @haveData and @haveColormap
-            @state
-                .float('colormap', @colormap)
-                .float('mixFactor', @mixFactor)
-                .float('time', @time)
-                .vec2('sourceSize', @texture1.width, @texture1.height)
-                .sampler('source0', @texture0)
-                .sampler('source1', @texture1)
+    draw(southWest, northEast, verticalSize, verticalOffset) {
+        if (this.haveData && this.haveColormap) {
+            this.state
+                .float('colormap', this.colormap)
+                .float('mixFactor', this.mixFactor)
+                .float('time', this.time)
+                .vec2('sourceSize', this.texture1.width, this.texture1.height)
+                .sampler('source0', this.texture0)
+                .sampler('source1', this.texture1)
                 .float('minIntensity', 0)
                 .float('maxIntensity', 255)
-                .int('colorCount', @colorCount)
+                .int('colorCount', this.colorCount)
                 .float('verticalSize', verticalSize)
                 .float('verticalOffset', verticalOffset)
                 .vec2('slippyBounds.southWest', southWest.x, southWest.y)
-                .vec2('slippyBounds.northEast', northEast.x, northEast.y)
+                .vec2('slippyBounds.northEast', northEast.x, northEast.y);
 
-            if @fadeFun is 'noise' or @fadeFun is 'fbm'
-                if @fadeParams?
-                    @state
-                        .float('spatialFrequency', @fadeParams.spatialFrequency ? 10)
-                        .float('timeFrequency', @fadeParams.timeFrequency ? @bitmaps.length/2)
-                        .float('amplitude', @fadeParams.amplitude ? 1.0)
-                        .float('attack', @fadeParams.attack ? 0.25)
-                    if @fadeFun is 'fbm'
-                        @state
-                            .float('spatialLacunarity', @fadeParams.spatialLacunarity ? 2)
-                            .float('timeLacunarity', @fadeParams.timeLacunarity ? 1)
-                            .float('gain', @fadeParams.gain ? 0.5)
+            if ((this.fadeFun === 'noise') || (this.fadeFun === 'fbm')) {
+                if (this.fadeParams != null) {
+                    this.state
+                        .float('spatialFrequency', this.fadeParams.spatialFrequency != null ? this.fadeParams.spatialFrequency : 10)
+                        .float('timeFrequency', this.fadeParams.timeFrequency != null ? this.fadeParams.timeFrequency : this.bitmaps.length/2)
+                        .float('amplitude', this.fadeParams.amplitude != null ? this.fadeParams.amplitude : 1.0)
+                        .float('attack', this.fadeParams.attack != null ? this.fadeParams.attack : 0.25);
+                    if (this.fadeFun === 'fbm') {
+                        this.state
+                            .float('spatialLacunarity', this.fadeParams.spatialLacunarity != null ? this.fadeParams.spatialLacunarity : 2)
+                            .float('timeLacunarity', this.fadeParams.timeLacunarity != null ? this.fadeParams.timeLacunarity : 1)
+                            .float('gain', this.fadeParams.gain != null ? this.fadeParams.gain : 0.5);
+                    }
 
-                else
-                    @state
+                } else {
+                    this.state
                         .float('spatialFrequency', 10)
-                        .float('timeFrequency', @bitmaps.length/2)
+                        .float('timeFrequency', this.bitmaps.length/2)
                         .float('amplitude', 1.0)
-                        .float('attack', 0.25)
-                    if @fadeFun is 'fbm'
-                        @state
+                        .float('attack', 0.25);
+                    if (this.fadeFun === 'fbm') {
+                        this.state
                             .float('spatialLacunarity', 2)
                             .float('timeLacunarity', 1)
-                            .float('gain', 0.5)
+                            .float('gain', 0.5);
+                    }
+                }
+            }
 
-            @state.draw()
+            return this.state.draw();
+        }
+    }
    
-    ## public interface ##
-    setData: (data) ->
-        @parent.dirty = true
+    //# public interface ##
+    setData(data) {
+        this.parent.dirty = true;
         
-        @width = data.width
-        @height = data.height
+        this.width = data.width;
+        this.height = data.height;
         
-        @projection = proj4(
-            new proj4.Proj(data.projection)
+        this.projection = proj4(
+            new proj4.Proj(data.projection),
             new proj4.Proj('WGS84')
-        )
+        );
 
-        @bounds = data.bounds
+        this.bounds = data.bounds;
 
-        @tessellate(data)
-        @updateBitmaps(data)
+        this.tessellate(data);
+        this.updateBitmaps(data);
 
-        @haveData = true
+        return this.haveData = true;
+    }
 
-    setTime: (time) ->
-        if @bitmaps?
-            @parent.dirty = true
+    setTime(time) {
+        if (this.bitmaps != null) {
+            let frame0, frame1;
+            this.parent.dirty = true;
 
-            if time < @bitmaps[0].time
-                frame0 = @bitmaps[0]
-                frame1 = @bitmaps[1]
-            else if time > @bitmaps[@bitmaps.length-1].time
-                frame0 = @bitmaps[@bitmaps.length-2]
-                frame1 = @bitmaps[@bitmaps.length-1]
-            else
-                for i in [0...@bitmaps.length-1]
-                    frame0 = @bitmaps[i]
-                    frame1 = @bitmaps[i+1]
-                    if time >= frame0.time and time <= frame1.time
-                        break
+            if (time < this.bitmaps[0].time) {
+                frame0 = this.bitmaps[0];
+                frame1 = this.bitmaps[1];
+            } else if (time > this.bitmaps[this.bitmaps.length-1].time) {
+                frame0 = this.bitmaps[this.bitmaps.length-2];
+                frame1 = this.bitmaps[this.bitmaps.length-1];
+            } else {
+                for (let i = 0, end = this.bitmaps.length-1, asc = 0 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
+                    frame0 = this.bitmaps[i];
+                    frame1 = this.bitmaps[i+1];
+                    if ((time >= frame0.time) && (time <= frame1.time)) {
+                        break;
+                    }
+                }
+            }
 
-            @mixFactor = (time - frame0.time)/(frame1.time-frame0.time)
+            this.mixFactor = (time - frame0.time)/(frame1.time-frame0.time);
 
-            if @frame0 isnt frame0
-                @frame0 = frame0
-                @texture0.dataSized @frame0.bitmap, @width, @height, 1
+            if (this.frame0 !== frame0) {
+                this.frame0 = frame0;
+                this.texture0.dataSized(this.frame0.bitmap, this.width, this.height, 1);
+            }
 
-            if @frame1 isnt frame1
-                @frame1 = frame1
-                @texture1.dataSized @frame1.bitmap, @width, @height, 1
+            if (this.frame1 !== frame1) {
+                this.frame1 = frame1;
+                this.texture1.dataSized(this.frame1.bitmap, this.width, this.height, 1);
+            }
 
-            @time = (time - @firstFrame.time)/(@lastFrame.time - @firstFrame.time)
+            return this.time = (time - this.firstFrame.time)/(this.lastFrame.time - this.firstFrame.time);
+        }
+    }
 
-    setInterpolation: (@interpolationName) ->
-        @parent.dirty = true
-        @shader.source @shaders[@fadeFun][@interpolationName]
+    setInterpolation(interpolationName) {
+        this.interpolationName = interpolationName;
+        this.parent.dirty = true;
+        return this.shader.source(this.shaders[this.fadeFun][this.interpolationName]);
+    }
 
-    setFadeFun: (@fadeFun, params) ->
-        @fadeParams = params
-        @parent.dirty = true
-        @shader.source @shaders[@fadeFun][@interpolationName]
+    setFadeFun(fadeFun, params) {
+        this.fadeFun = fadeFun;
+        this.fadeParams = params;
+        this.parent.dirty = true;
+        return this.shader.source(this.shaders[this.fadeFun][this.interpolationName]);
+    }
+});

@@ -1,319 +1,413 @@
-matrix = require 'matrix'
+/*
+ * decaffeinate suggestions:
+ * DS001: Remove Babel/TypeScript constructor workaround
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let Shader, ShaderObj, ShaderProxy;
+import matrix from 'matrix';
 
-exports.ShaderObj = class ShaderObj
+let defaultExport = {};
+defaultExport.ShaderObj = (ShaderObj = class ShaderObj {});
 
-boilerplate = '''
-    precision highp int;
-    precision highp float;
-    #define PI 3.141592653589793
-    #define TAU 6.283185307179586
-    #define PIH 1.5707963267948966
-    #define E 2.7182818284590451
-    float angleBetween(vec3 a, vec3 b){return acos(dot(a,b));}
+const boilerplate = `\
+precision highp int;
+precision highp float;
+#define PI 3.141592653589793
+#define TAU 6.283185307179586
+#define PIH 1.5707963267948966
+#define E 2.7182818284590451
+float angleBetween(vec3 a, vec3 b){return acos(dot(a,b));}
 
-    vec3 gamma(vec3 color){
-        return pow(color, vec3(1.0/2.4)); 
+vec3 gamma(vec3 color){
+    return pow(color, vec3(1.0/2.4)); 
+}
+
+vec3 degamma(vec3 color){
+    return pow(color, vec3(2.4));
+}
+
+vec3 gammasRGB(vec3 color){
+    return mix(
+        color*12.92,
+        pow(color, vec3(1.0/2.4))*1.055-0.055,
+        step((0.04045/12.92), color)
+    );
+}
+
+vec3 degammasRGB(vec3 color){
+    return mix(
+        color/12.92,
+        pow((color+0.055)/1.055, vec3(2.4)),
+        step(0.04045, color)
+    );
+}
+
+float linstep(float edge0, float edge1, float value){
+    return clamp((value-edge0)/(edge1-edge0), 0.0, 1.0);
+}
+
+float linstepOpen(float edge0, float edge1, float value){
+    return (value-edge0)/(edge1-edge0);
+}
+
+vec2 linstep(vec2 edge0, vec2 edge1, vec2 value){
+    return clamp((value-edge0)/(edge1-edge0), vec2(0.0), vec2(1.0));
+}
+
+vec2 linstepOpen(vec2 edge0, vec2 edge1, vec2 value){
+    return (value-edge0)/(edge1-edge0);
+}\
+`;
+
+defaultExport.Shader = (Shader = class Shader extends ShaderObj {
+    constructor(gf, params) {
+        {
+          // Hack: trick Babel/TypeScript into allowing this before super.
+          if (false) { super(); }
+          let thisFn = (() => { return this; }).toString();
+          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
+          eval(`${thisName} = this;`);
+        }
+        this.gf = gf;
+        this.gl = this.gf.gl;
+
+        this.program    = this.gl.createProgram();
+        this.vs         = this.gl.createShader(this.gl.VERTEX_SHADER);
+        this.fs         = this.gl.createShader(this.gl.FRAGMENT_SHADER);
+        this.gl.attachShader(this.program, this.vs);
+        this.gl.attachShader(this.program, this.fs);
+
+        this.source(params);
     }
 
-    vec3 degamma(vec3 color){
-        return pow(color, vec3(2.4));
-    }
+    source(params) {
+        let common, fragment, vertex;
+        if (typeof params === 'string') {
+            [common, vertex, fragment] = Array.from(this.splitSource(params));
+        } else if (params instanceof sys.File) {
+            [common, vertex, fragment] = Array.from(this.splitSource(params.read()));
+        } else if (params instanceof Array) {
+            common = [];
+            vertex = [];
+            fragment = [];
+            for (let file of Array.from(params)) {
+                const [c, v, f] = Array.from(this.splitSource(file.read()));
+                if (c.length > 0) { common.push(c); }
+                if (v.length > 0) { vertex.push(v); }
+                if (f.length > 0) { fragment.push(f); }
+            }
 
-    vec3 gammasRGB(vec3 color){
-        return mix(
-            color*12.92,
-            pow(color, vec3(1.0/2.4))*1.055-0.055,
-            step((0.04045/12.92), color)
-        );
-    }
+            common = common.join('\n');
+            vertex = vertex.join('\n');
+            fragment = fragment.join('\n');
+        }
 
-    vec3 degammasRGB(vec3 color){
-        return mix(
-            color/12.92,
-            pow((color+0.055)/1.055, vec3(2.4)),
-            step(0.04045, color)
-        );
-    }
-    
-    float linstep(float edge0, float edge1, float value){
-        return clamp((value-edge0)/(edge1-edge0), 0.0, 1.0);
-    }
-    
-    float linstepOpen(float edge0, float edge1, float value){
-        return (value-edge0)/(edge1-edge0);
-    }
-
-    vec2 linstep(vec2 edge0, vec2 edge1, vec2 value){
-        return clamp((value-edge0)/(edge1-edge0), vec2(0.0), vec2(1.0));
+        return this.setSource({common, vertex, fragment});
     }
     
-    vec2 linstepOpen(vec2 edge0, vec2 edge1, vec2 value){
-        return (value-edge0)/(edge1-edge0);
+    destroy() {
+        this.gl.deleteShader(this.vs);
+        this.gl.deleteShader(this.fs);
+        return this.gl.deleteProgram(this.program);
     }
-'''
 
-exports.Shader = class Shader extends ShaderObj
-    constructor: (@gf, params) ->
-        @gl = @gf.gl
+    splitSource(source) {
+        const common = [];
+        const vertex = [];
+        const fragment = [];
+        let current = common;
 
-        @program    = @gl.createProgram()
-        @vs         = @gl.createShader @gl.VERTEX_SHADER
-        @fs         = @gl.createShader @gl.FRAGMENT_SHADER
-        @gl.attachShader @program, @vs
-        @gl.attachShader @program, @fs
+        const lines = source.trim().split('\n');
+        const filename = lines.shift().split(' ')[1];
 
-        @source params
+        for (let linenum = 0; linenum < lines.length; linenum++) {
+            const line = lines[linenum];
+            if (line.match(/vertex:$/)) {
+                current = vertex;
+            } else if (line.match(/fragment:$/)) {
+                current = fragment;
+            } else {
+                current.push(`#line ${linenum} ${filename}`);
+                current.push(line);
+            }
+        }
 
-    source: (params) ->
-        if typeof params is 'string'
-            [common, vertex, fragment] = @splitSource params
-        else if params instanceof sys.File
-            [common, vertex, fragment] = @splitSource params.read()
-        else if params instanceof Array
-            common = []
-            vertex = []
-            fragment = []
-            for file in params
-                [c, v, f] = @splitSource file.read()
-                if c.length > 0 then common.push c
-                if v.length > 0 then vertex.push v
-                if f.length > 0 then fragment.push f
+        return [common.join('\n').trim(), vertex.join('\n').trim(), fragment.join('\n').trim()];
+    }
 
-            common = common.join('\n')
-            vertex = vertex.join('\n')
-            fragment = fragment.join('\n')
-
-        @setSource common:common, vertex:vertex, fragment:fragment
+    preprocess(source) {
+        const lines = [];
+        const result = [];
+        let filename = 'no file';
+        let lineno = 1;
+        for (let line of Array.from(source.trim().split('\n'))) {
+            const match = line.match(/#line (\d+) (.*)/);
+            if (match) {
+                lineno = parseInt(match[1], 10)+1;
+                filename = match[2];
+            } else {
+                lines.push({
+                    source: line,
+                    lineno,
+                    filename
+                });
+                result.push(line);
+                lineno += 1;
+            }
+        }
+        return [result.join('\n'), lines];
+    }
     
-    destroy: ->
-        @gl.deleteShader @vs
-        @gl.deleteShader @fs
-        @gl.deleteProgram @program
+    setSource({common, vertex, fragment}) {
+        this.uniformCache = {};
+        this.attributeCache = {};
 
-    splitSource: (source) ->
-        common = []
-        vertex = []
-        fragment = []
-        current = common
-
-        lines = source.trim().split('\n')
-        filename = lines.shift().split(' ')[1]
-
-        for line, linenum in lines
-            if line.match /vertex:$/
-                current = vertex
-            else if line.match /fragment:$/
-                current = fragment
-            else
-                current.push "#line #{linenum} #{filename}"
-                current.push line
-
-        return [common.join('\n').trim(), vertex.join('\n').trim(), fragment.join('\n').trim()]
-
-    preprocess: (source) ->
-        lines = []
-        result = []
-        filename = 'no file'
-        lineno = 1
-        for line in source.trim().split('\n')
-            match = line.match /#line (\d+) (.*)/
-            if match
-                lineno = parseInt(match[1], 10)+1
-                filename = match[2]
-            else
-                lines.push
-                    source: line
-                    lineno: lineno
-                    filename: filename
-                result.push line
-                lineno += 1
-        return [result.join('\n'), lines]
+        if (common == null) { common = ''; }
+        this.compileShader(this.vs, [common, vertex].join('\n'));
+        this.compileShader(this.fs, [common, fragment].join('\n'));
+        return this.link();
+    }
     
-    setSource: ({common, vertex, fragment}) ->
-        @uniformCache = {}
-        @attributeCache = {}
+    compileShader(shader, source) {
+        let lines;
+        source = [boilerplate, source].join('\n');
+        [source, lines] = Array.from(this.preprocess(source));
 
-        common ?= ''
-        @compileShader @vs, [common, vertex].join('\n')
-        @compileShader @fs, [common, fragment].join('\n')
-        @link()
+        this.gl.shaderSource(shader, source);
+        this.gl.compileShader(shader);
+
+        if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
+            const error = this.gl.getShaderInfoLog(shader);
+            throw this.translateError(error, lines);
+        }
+    }
     
-    compileShader: (shader, source) ->
-        source = [boilerplate, source].join('\n')
-        [source, lines] = @preprocess source
+    link() {
+        this.gl.linkProgram(this.program);
 
-        @gl.shaderSource shader, source
-        @gl.compileShader shader
-
-        if not @gl.getShaderParameter shader, @gl.COMPILE_STATUS
-            error = @gl.getShaderInfoLog(shader)
-            throw @translateError error, lines
+        if (!this.gl.getProgramParameter(this.program, this.gl.LINK_STATUS)) {
+            throw new Error(`Shader Link Error: ${this.gl.getProgramInfoLog(this.program)}`);
+        }
+    }
     
-    link: ->
-        @gl.linkProgram @program
+    translateError(error, lines) {
+        const result = ['Shader Compile Error'];
+        const iterable = error.split('\n');
+        for (let i = 0; i < iterable.length; i++) {
+            const line = iterable[i];
+            const match = line.match(/ERROR: \d+:(\d+): (.*)/);
+            if (match) {
+                const lineno = parseFloat(match[1])-1;
+                const message = match[2];
+                const sourceline = lines[lineno];
+                result.push(`File \"${sourceline.filename}\", Line ${sourceline.lineno}, ${message}`);
+                result.push(`   ${sourceline.source}`);
+            } else {
+                result.push(line);
+            }
+        }
 
-        if not @gl.getProgramParameter @program, @gl.LINK_STATUS
-            throw new Error("Shader Link Error: #{@gl.getProgramInfoLog(@program)}")
+        return result.join('\n');
+    }
     
-    translateError: (error, lines) ->
-        result = ['Shader Compile Error']
-        for line, i in error.split('\n')
-            match = line.match /ERROR: \d+:(\d+): (.*)/
-            if match
-                lineno = parseFloat(match[1])-1
-                message = match[2]
-                sourceline = lines[lineno]
-                result.push "File \"#{sourceline.filename}\", Line #{sourceline.lineno}, #{message}"
-                result.push "   #{sourceline.source}"
-            else
-                result.push line
+    attributeLocation(name) {
+        let location = this.attributeCache[name];
+        if (location === undefined) {
+            location = this.gl.getAttribLocation(this.program, name);
+            if (location >= 0) {
+                this.attributeCache[name] = location;
+                return location;
+            } else {
+                this.attributeCache[name] = null;
+                return null;
+            }
+        } else {
+            return location;
+        }
+    }
+    
+    uniformLocation(name) {
+        let location = this.uniformCache[name];
+        if (location === undefined) {
+            location = this.gl.getUniformLocation(this.program, name);
+            if (location != null) {
+                this.uniformCache[name] = location;
+                return location;
+            } else {
+                this.uniformCache[name] = null;
+                return null;
+            }
+        } else {
+            return location;
+        }
+    }
+    
+    use() {
+        if (this.gf.currentShader !== this) {
+            this.gf.currentShader = this;
+            return this.gl.useProgram(this.program);
+        }
+    }
 
-        return result.join('\n')
-    
-    attributeLocation: (name) ->
-        location = @attributeCache[name]
-        if location is undefined
-            location = @gl.getAttribLocation @program, name
-            if location >= 0
-                @attributeCache[name] = location
-                return location
-            else
-                @attributeCache[name] = null
-                return null
-        else
-            return location
-    
-    uniformLocation: (name) ->
-        location = @uniformCache[name]
-        if location is undefined
-            location = @gl.getUniformLocation @program, name
-            if location?
-                @uniformCache[name] = location
-                return location
-            else
-                @uniformCache[name] = null
-                return null
-        else
-            return location
-    
-    use: ->
-        if @gf.currentShader isnt @
-            @gf.currentShader = @
-            @gl.useProgram @program
+    mat4(name, value) {
+        if (value instanceof matrix.Mat4) {
+            value = value.data;
+        }
 
-    mat4: (name, value) ->
-        if value instanceof matrix.Mat4
-            value = value.data
-
-        location = @uniformLocation name
-        if location?
-            @use()
-            @gl.uniformMatrix4fv location, false, value
+        const location = this.uniformLocation(name);
+        if (location != null) {
+            this.use();
+            this.gl.uniformMatrix4fv(location, false, value);
+        }
         
-        return @
+        return this;
+    }
     
-    mat3: (name, value) ->
-        if value instanceof matrix.Mat3
-            value = value.data
+    mat3(name, value) {
+        if (value instanceof matrix.Mat3) {
+            value = value.data;
+        }
 
-        location = @uniformLocation name
-        if location?
-            @use()
-            @gl.uniformMatrix3fv location, false, value
+        const location = this.uniformLocation(name);
+        if (location != null) {
+            this.use();
+            this.gl.uniformMatrix3fv(location, false, value);
+        }
         
-        return @
+        return this;
+    }
     
-    vec2: (name, a, b) ->
-        location = @uniformLocation name
+    vec2(name, a, b) {
+        const location = this.uniformLocation(name);
 
-        if location?
-            @use()
-            if a instanceof Array or a instanceof Float32Array
-                @gl.uniform2fv location, a
-            else
-                @gl.uniform2f location, a, b
-        return @
+        if (location != null) {
+            this.use();
+            if (a instanceof Array || a instanceof Float32Array) {
+                this.gl.uniform2fv(location, a);
+            } else {
+                this.gl.uniform2f(location, a, b);
+            }
+        }
+        return this;
+    }
 
-    vec3: (name, a, b, c) ->
-        location = @uniformLocation name
+    vec3(name, a, b, c) {
+        const location = this.uniformLocation(name);
 
-        if location?
-            @use()
-            if a instanceof Array or a instanceof Float32Array
-                @gl.uniform3fv location, a
-            else
-                @gl.uniform3f location, a, b, c
-        return @
+        if (location != null) {
+            this.use();
+            if (a instanceof Array || a instanceof Float32Array) {
+                this.gl.uniform3fv(location, a);
+            } else {
+                this.gl.uniform3f(location, a, b, c);
+            }
+        }
+        return this;
+    }
     
-    vec4: (name, a, b, c, d) ->
-        location = @uniformLocation name
+    vec4(name, a, b, c, d) {
+        const location = this.uniformLocation(name);
 
-        if location?
-            @use()
-            if a instanceof Array or a instanceof Float32Array
-                @gl.uniform4fv location, a
-            else
-                @gl.uniform4f location, a, b, c, d
-        return @
+        if (location != null) {
+            this.use();
+            if (a instanceof Array || a instanceof Float32Array) {
+                this.gl.uniform4fv(location, a);
+            } else {
+                this.gl.uniform4f(location, a, b, c, d);
+            }
+        }
+        return this;
+    }
 
-    int: (name, value) ->
-        location = @uniformLocation name
-        if location?
-            @use()
-            @gl.uniform1i location, value
-        return @
+    int(name, value) {
+        const location = this.uniformLocation(name);
+        if (location != null) {
+            this.use();
+            this.gl.uniform1i(location, value);
+        }
+        return this;
+    }
 
-    uniformSetter: (obj) ->
-        obj.setUniformsOn(@)
-        return @
+    uniformSetter(obj) {
+        obj.setUniformsOn(this);
+        return this;
+    }
 
-    float: (name, value) ->
-        location = @uniformLocation name
-        if location?
-            @use()
-            if value instanceof Array or value instanceof Float32Array
-                @gl.uniform1fv location, value
-            else
-                @gl.uniform1f location, value
-        return @
+    float(name, value) {
+        const location = this.uniformLocation(name);
+        if (location != null) {
+            this.use();
+            if (value instanceof Array || value instanceof Float32Array) {
+                this.gl.uniform1fv(location, value);
+            } else {
+                this.gl.uniform1f(location, value);
+            }
+        }
+        return this;
+    }
+});
 
-exports.ShaderProxy = class ShaderProxy extends ShaderObj
-    constructor: (@shader=null) ->
+defaultExport.ShaderProxy = (ShaderProxy = class ShaderProxy extends ShaderObj {
+    constructor(shader=null) {
+        {
+          // Hack: trick Babel/TypeScript into allowing this before super.
+          if (false) { super(); }
+          let thisFn = (() => { return this; }).toString();
+          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
+          eval(`${thisName} = this;`);
+        }
+        this.shader = shader;
+    }
     
-    attributeLocation: (name) ->
-        @shader.attributeLocation(name)
+    attributeLocation(name) {
+        return this.shader.attributeLocation(name);
+    }
 
-    uniformLocation: (name) ->
-        @shader.uniformLocation(name)
+    uniformLocation(name) {
+        return this.shader.uniformLocation(name);
+    }
 
-    use: ->
-        @shader.use()
-        return @
+    use() {
+        this.shader.use();
+        return this;
+    }
 
-    mat4: (name, value) ->
-        @shader.mat4 name, value
-        return @
+    mat4(name, value) {
+        this.shader.mat4(name, value);
+        return this;
+    }
 
-    vec2: (name, a, b) ->
-        @shader.vec2 name, a, b
-        return @
+    vec2(name, a, b) {
+        this.shader.vec2(name, a, b);
+        return this;
+    }
 
-    vec3: (name, a, b, c) ->
-        @shader.vec3 name, a, b, c
-        return @
+    vec3(name, a, b, c) {
+        this.shader.vec3(name, a, b, c);
+        return this;
+    }
     
-    vec4: (name, a, b, c, d) ->
-        @shader.vec4 name, a, b, c, d
-        return @
+    vec4(name, a, b, c, d) {
+        this.shader.vec4(name, a, b, c, d);
+        return this;
+    }
 
-    int: (name, value) ->
-        @shader.int name, value
-        return @
+    int(name, value) {
+        this.shader.int(name, value);
+        return this;
+    }
 
-    uniformSetter: (obj) ->
-        @shader.uniformSetter obj
-        return @
+    uniformSetter(obj) {
+        this.shader.uniformSetter(obj);
+        return this;
+    }
 
-    float: (name, value) ->
-        @shader.float name, value
-        return @
+    float(name, value) {
+        this.shader.float(name, value);
+        return this;
+    }
+});
+export default defaultExport;

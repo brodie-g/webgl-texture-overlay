@@ -1,120 +1,147 @@
-WebGLFramework = require 'webgl-framework'
-layer = require 'texture-layer'
-ClipRegion = require 'clip'
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+import WebGLFramework from 'webgl-framework';
+import layer from 'texture-layer';
+import ClipRegion from 'clip';
 
-class WebGLTextureOverlay
-    constructor: ->
-        @canvas = L.DomUtil.create 'canvas', 'leaflet-webgl-texture-overlay'
-        @gf = new WebGLFramework
-            canvas: @canvas
+class WebGLTextureOverlay {
+    constructor() {
+        this.draw = this.draw.bind(this);
+        this.canvas = L.DomUtil.create('canvas', 'leaflet-webgl-texture-overlay');
+        this.gf = new WebGLFramework({
+            canvas: this.canvas,
             premultipliedAlpha: false
+        });
 
-        @dirty = false
-        @running = false
+        this.dirty = false;
+        this.running = false;
 
-        @layers = []
-        @interpolations = [
+        this.layers = [];
+        this.interpolations = [
             'nearest', 'lerp', 'smoothstep', 'euclidian', 'classicBicubic', 'hex-nearest', 'hex-linear', 'hex-smoothstep',
             'bicubicLinear', 'polynom6th', 'bicubicSmoothstep', 'bspline', 'bell', 'catmull-rom'
-        ]
-        @fades = ['crossfade', 'dissolve', 'noise', 'fbm']
-        requestAnimationFrame @draw
+        ];
+        this.fades = ['crossfade', 'dissolve', 'noise', 'fbm'];
+        requestAnimationFrame(this.draw);
+    }
 
-    onAdd: (@map) ->
-        @dirty = true
+    onAdd(map) {
+        this.map = map;
+        this.dirty = true;
 
-        if @clipRegion?
-            @clipRegion.dirty = true
+        if (this.clipRegion != null) {
+            this.clipRegion.dirty = true;
+        }
 
-        @running = true
+        this.running = true;
 
-        size = @map.getSize()
-        @canvas.width = size.x
-        @canvas.height = size.y
-        L.DomUtil.addClass(@canvas, 'leaflet-zoom-animated')
+        const size = this.map.getSize();
+        this.canvas.width = size.x;
+        this.canvas.height = size.y;
+        L.DomUtil.addClass(this.canvas, 'leaflet-zoom-animated');
 
-        @map.getPanes().overlayPane.appendChild(@canvas)
-        @map.on 'movestart', @move, @
-        @map.on 'move', @move, @
-        @map.on 'moveend', @move, @
-        @map.on 'resize', @resize, @
-        @map.on 'zoomanim', @zoomanim, @
+        this.map.getPanes().overlayPane.appendChild(this.canvas);
+        this.map.on('movestart', this.move, this);
+        this.map.on('move', this.move, this);
+        this.map.on('moveend', this.move, this);
+        this.map.on('resize', this.resize, this);
+        return this.map.on('zoomanim', this.zoomanim, this);
+    }
     
-    addTo: (map) ->
-        map.addLayer(@)
-        return @
+    addTo(map) {
+        map.addLayer(this);
+        return this;
+    }
     
-    onRemove: (map) ->
-        @running = false
+    onRemove(map) {
+        this.running = false;
 
-        map.getPanes().overlayPane.removeChild(@canvas)
-        @map.off 'movestart', @move, @
-        @map.off 'move', @move, @
-        @map.off 'moveend', @move, @
-        @map.off 'resize', @resize, @
-        @map.off 'zoomanim', @zoomanim, @
+        map.getPanes().overlayPane.removeChild(this.canvas);
+        this.map.off('movestart', this.move, this);
+        this.map.off('move', this.move, this);
+        this.map.off('moveend', this.move, this);
+        this.map.off('resize', this.resize, this);
+        this.map.off('zoomanim', this.zoomanim, this);
 
-        @map = null
+        return this.map = null;
+    }
 
-    move: (event) ->
-        @dirty = true
-        topleft = @map.containerPointToLayerPoint([0,0])
-        L.DomUtil.setPosition(@canvas, topleft)
+    move(event) {
+        this.dirty = true;
+        const topleft = this.map.containerPointToLayerPoint([0,0]);
+        return L.DomUtil.setPosition(this.canvas, topleft);
+    }
 
-    resize: (event) ->
-        @dirty = true
-        @canvas.width = event.newSize.x
-        @canvas.height = event.newSize.y
+    resize(event) {
+        this.dirty = true;
+        this.canvas.width = event.newSize.x;
+        return this.canvas.height = event.newSize.y;
+    }
     
-    zoomanim: (event) ->
-        scale = @map.getZoomScale(event.zoom)
-        offset = @map._getCenterOffset(event.center)._multiplyBy(-scale).subtract(@map._getMapPanePos())
+    zoomanim(event) {
+        const scale = this.map.getZoomScale(event.zoom);
+        const offset = this.map._getCenterOffset(event.center)._multiplyBy(-scale).subtract(this.map._getMapPanePos());
 
-        @canvas.style[L.DomUtil.TRANSFORM] = L.DomUtil.getTranslateString(offset) + " scale(#{scale})"
+        return this.canvas.style[L.DomUtil.TRANSFORM] = L.DomUtil.getTranslateString(offset) + ` scale(${scale})`;
+    }
     
-    draw: =>
-        if @clipRegion?
-            dirty = @clipRegion.check() or @dirty
-        else
-            dirty = @dirty
+    draw() {
+        let dirty;
+        if (this.clipRegion != null) {
+            dirty = this.clipRegion.check() || this.dirty;
+        } else {
+            ({ dirty } = this);
+        }
 
-        if dirty and @running
-            @dirty = false
-            size     = @map.getSize()
-            bounds   = @map.getBounds()
-            zoom = @map.getZoom()
+        if (dirty && this.running) {
+            this.dirty = false;
+            const size     = this.map.getSize();
+            const bounds   = this.map.getBounds();
+            const zoom = this.map.getZoom();
 
-            sw = bounds.getSouthWest()
-            ne = bounds.getNorthEast()
+            const sw = bounds.getSouthWest();
+            const ne = bounds.getNorthEast();
             
-            screenNorth = @map.latLngToContainerPoint(ne).y/size.y
-            screenSouth = @map.latLngToContainerPoint(sw).y/size.y
+            const screenNorth = this.map.latLngToContainerPoint(ne).y/size.y;
+            const screenSouth = this.map.latLngToContainerPoint(sw).y/size.y;
 
-            southWest = @map.project(sw, 0).divideBy(256)
-            northEast = @map.project(ne, 0).divideBy(256)
+            const southWest = this.map.project(sw, 0).divideBy(256);
+            const northEast = this.map.project(ne, 0).divideBy(256);
 
-            verticalSize = screenSouth - screenNorth
-            verticalOffset = 1.0 - (screenSouth + screenNorth)
+            const verticalSize = screenSouth - screenNorth;
+            const verticalOffset = 1.0 - (screenSouth + screenNorth);
 
-            for layer in @layers
-                layer.draw(southWest, northEast, verticalSize, verticalOffset)
+            for (layer of Array.from(this.layers)) {
+                layer.draw(southWest, northEast, verticalSize, verticalOffset);
+            }
            
-            if @clipRegion?
-                @clipRegion.draw(southWest, northEast, verticalSize, verticalOffset)
+            if (this.clipRegion != null) {
+                this.clipRegion.draw(southWest, northEast, verticalSize, verticalOffset);
+            }
+        }
 
-        requestAnimationFrame @draw
+        return requestAnimationFrame(this.draw);
+    }
 
-    setClip: (region) ->
-        if not @clipRegion?
-            @clipRegion = new ClipRegion(@gf, @)
+    setClip(region) {
+        if ((this.clipRegion == null)) {
+            this.clipRegion = new ClipRegion(this.gf, this);
+        }
 
-        @clipRegion.set(region)
+        return this.clipRegion.set(region);
+    }
 
-    addLayer: (params) ->
-        @dirty = true
-        layer = new layer.Video(@, params)
-        @layers.push layer
-        return layer
+    addLayer(params) {
+        this.dirty = true;
+        layer = new layer.Video(this, params);
+        this.layers.push(layer);
+        return layer;
+    }
+}
 
-L.webglTextureOverlay = ->
-    new WebGLTextureOverlay()
+L.webglTextureOverlay = () => new WebGLTextureOverlay();

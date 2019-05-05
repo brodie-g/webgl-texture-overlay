@@ -1,1 +1,3 @@
-exports.Video = require 'video'
+let defaultExport = {};
+defaultExport.Video = require('video');
+export default defaultExport;

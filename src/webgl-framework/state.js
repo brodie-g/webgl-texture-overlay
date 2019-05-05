@@ -1,283 +1,378 @@
-util = require 'util'
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS104: Avoid inline assignments
+ * DS202: Simplify dynamic range loops
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let State;
+import util from 'util';
 
-VertexBuffer = require 'vertexbuffer'
-{ShaderObj} = require 'shader'
-framebuffer = require 'framebuffer'
+import VertexBuffer from 'vertexbuffer';
+import { ShaderObj } from 'shader';
+import framebuffer from 'framebuffer';
 
-exports = class State
-    constructor: (@gf, params) ->
-        @gl = @gf.gl
+const exports = (State = class State {
+    constructor(gf, params) {
+        this.blendAlpha = this.blendAlpha.bind(this);
+        let location;
+        this.gf = gf;
+        this.gl = this.gf.gl;
 
-        if params.shader instanceof ShaderObj
-            @shader = params.shader
-            @ownShader = false
-        else
-            @shader = @gf.shader params.shader
-            @ownShader = true
+        if (params.shader instanceof ShaderObj) {
+            this.shader = params.shader;
+            this.ownShader = false;
+        } else {
+            this.shader = this.gf.shader(params.shader);
+            this.ownShader = true;
+        }
 
-        if params.framebuffer?
-            if params.framebuffer instanceof framebuffer.Framebuffer
-                @framebuffer = params.framebuffer
-                @ownFramebuffer = false
-            else
-                @framebuffer = @gf.framebuffer params.framebuffer
-                @ownFramebuffer = true
-        else
-            @framebuffer = null
-            @ownFramebuffer = false
+        if (params.framebuffer != null) {
+            if (params.framebuffer instanceof framebuffer.Framebuffer) {
+                this.framebuffer = params.framebuffer;
+                this.ownFramebuffer = false;
+            } else {
+                this.framebuffer = this.gf.framebuffer(params.framebuffer);
+                this.ownFramebuffer = true;
+            }
+        } else {
+            this.framebuffer = null;
+            this.ownFramebuffer = false;
+        }
 
-        if params.vertexbuffer?
-            if params.vertexbuffer instanceof VertexBuffer
-                @vertexbuffer = params.vertexbuffer
-                @ownVertexbuffer = false
-            else
-                @vertexbuffer = @gf.vertexbuffer params.vertexbuffer
-                @ownVertexbuffer = true
-        else
-            @vertexbuffer = @gf.quadVertices
-            @ownVertexBuffer = false
+        if (params.vertexbuffer != null) {
+            if (params.vertexbuffer instanceof VertexBuffer) {
+                this.vertexbuffer = params.vertexbuffer;
+                this.ownVertexbuffer = false;
+            } else {
+                this.vertexbuffer = this.gf.vertexbuffer(params.vertexbuffer);
+                this.ownVertexbuffer = true;
+            }
+        } else {
+            this.vertexbuffer = this.gf.quadVertices;
+            this.ownVertexBuffer = false;
+        }
 
-        @pointers = for location in [0...@gf.maxAttribs]
-            null
+        this.pointers = (() => {
+            let asc, end;
+            const result = [];
+            for (location = 0, end = this.gf.maxAttribs, asc = 0 <= end; asc ? location < end : location > end; asc ? location++ : location--) {
+                result.push(null);
+            }
+            return result;
+        })();
 
-        for pointer in @vertexbuffer.pointers
-            location = @shader.attributeLocation pointer.name
-            if location?
-                pointer = util.clone pointer
-                pointer.location = location
-                @pointers[location] = pointer
+        for (let pointer of Array.from(this.vertexbuffer.pointers)) {
+            location = this.shader.attributeLocation(pointer.name);
+            if (location != null) {
+                pointer = util.clone(pointer);
+                pointer.location = location;
+                this.pointers[location] = pointer;
+            }
+        }
 
-        @texturesByName = {}
-        @textures = []
+        this.texturesByName = {};
+        this.textures = [];
 
-        @depthTest = params.depthTest ? false
-        @depthWrite = params.depthWrite ? true
-        if params.colorWrite?
-            if params.colorWrite instanceof Array
-                @colorWrite = params.colorWrite
-            else
-                @colorWrite = [params.colorWrite, params.colorWrite, params.colorWrite, params.colorWrite]
-        else
-            @colorWrite = [true,true,true,true]
+        this.depthTest = params.depthTest != null ? params.depthTest : false;
+        this.depthWrite = params.depthWrite != null ? params.depthWrite : true;
+        if (params.colorWrite != null) {
+            if (params.colorWrite instanceof Array) {
+                this.colorWrite = params.colorWrite;
+            } else {
+                this.colorWrite = [params.colorWrite, params.colorWrite, params.colorWrite, params.colorWrite];
+            }
+        } else {
+            this.colorWrite = [true,true,true,true];
+        }
 
-        if params.depthFunc?
-            @depthFunc = @gl[params.depthFunc.toUpperCase()] ? @gl.LESS
-        else
-            @depthFunc = @gl.LESS
+        if (params.depthFunc != null) {
+            let left;
+            this.depthFunc = (left = this.gl[params.depthFunc.toUpperCase()]) != null ? left : this.gl.LESS;
+        } else {
+            this.depthFunc = this.gl.LESS;
+        }
 
-        if params.cull?
-            @cullFace = @gl[params.cull.toUpperCase()] ? @gl.BACK
-        else
-            @cullFace = false
+        if (params.cull != null) {
+            let left1;
+            this.cullFace = (left1 = this.gl[params.cull.toUpperCase()]) != null ? left1 : this.gl.BACK;
+        } else {
+            this.cullFace = false;
+        }
 
-        @lineWidth = params.lineWidth ? 1
+        this.lineWidth = params.lineWidth != null ? params.lineWidth : 1;
 
-        if params.blend?
-            switch params.blend
-                when 'alpha'
-                    @blend = @blendAlpha
-                else
-                    throw new Error('blend mode is not implemented: ' + params.blend)
-        else
-            @blend = null
+        if (params.blend != null) {
+            switch (params.blend) {
+                case 'alpha':
+                    this.blend = this.blendAlpha;
+                    break;
+                default:
+                    throw new Error(`blend mode is not implemented: ${params.blend}`);
+            }
+        } else {
+            this.blend = null;
+        }
 
-        if params.uniforms?
-            for uniform in params.uniforms
-                @[uniform.type](uniform.name, uniform.value)
+        if (params.uniforms != null) {
+            for (let uniform of Array.from(params.uniforms)) {
+                this[uniform.type](uniform.name, uniform.value);
+            }
+        }
 
-        if @gf.vao?
-            @vao = @gf.vao.createVertexArrayOES()
-            @gf.vao.bindVertexArrayOES @vao
-            @setPointers()
-            @gf.vao.bindVertexArrayOES null
-        else
-            @vao = null
+        if (this.gf.vao != null) {
+            this.vao = this.gf.vao.createVertexArrayOES();
+            this.gf.vao.bindVertexArrayOES(this.vao);
+            this.setPointers();
+            this.gf.vao.bindVertexArrayOES(null);
+        } else {
+            this.vao = null;
+        }
+    }
 
-    destroy: ->
-        if @ownShader
-            @shader.destroy()
-        if @ownBuffer
-            @vertexbuffer.destroy()
+    destroy() {
+        if (this.ownShader) {
+            this.shader.destroy();
+        }
+        if (this.ownBuffer) {
+            this.vertexbuffer.destroy();
+        }
 
-        if @vao?
-            @gf.vao.deleteVertexArrayOES @vao
+        if (this.vao != null) {
+            return this.gf.vao.deleteVertexArrayOES(this.vao);
+        }
+    }
         
-    blendAlpha: =>
-        @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
-        @gl.enable @gl.BLEND
+    blendAlpha() {
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+        return this.gl.enable(this.gl.BLEND);
+    }
 
-    clearColor: (r=0, g=0, b=0, a=1) ->
-        @gl.clearColor r, g, b, a
-        @gl.clear @gl.COLOR_BUFFER_BIT
-        return @
+    clearColor(r, g, b, a) {
+        if (r == null) { r = 0; }
+        if (g == null) { g = 0; }
+        if (b == null) { b = 0; }
+        if (a == null) { a = 1; }
+        this.gl.clearColor(r, g, b, a);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+        return this;
+    }
 
-    clearDepth: (value=1) ->
-        @gl.clearDepth value
-        @gl.clear @gl.DEPTH_BUFFER_BIT
-        return @
+    clearDepth(value) {
+        if (value == null) { value = 1; }
+        this.gl.clearDepth(value);
+        this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
+        return this;
+    }
 
-    setViewport: (width, height) ->
-        width ?= @gl.canvas.width
-        height ?= @gl.canvas.height
+    setViewport(width, height) {
+        if (width == null) { ({ width } = this.gl.canvas); }
+        if (height == null) { ({ height } = this.gl.canvas); }
 
-        @gl.viewport 0, 0, width, height
+        return this.gl.viewport(0, 0, width, height);
+    }
 
-    setPointers: ->
-        @vertexbuffer.bind()
-        for pointer, location in @pointers
-            if pointer?
-                if not @gf.vertexUnits[location].enabled
-                    @gl.enableVertexAttribArray pointer.location
+    setPointers() {
+        this.vertexbuffer.bind();
+        for (let location = 0; location < this.pointers.length; location++) {
+            const pointer = this.pointers[location];
+            if (pointer != null) {
+                if (!this.gf.vertexUnits[location].enabled) {
+                    this.gl.enableVertexAttribArray(pointer.location);
+                }
 
-                @gl.vertexAttribPointer(
+                this.gl.vertexAttribPointer(
                     pointer.location,
                     pointer.size,
                     pointer.type,
                     false,
-                    @vertexbuffer.stride,
+                    this.vertexbuffer.stride,
                     pointer.offset
-                )
-            else
-                if @gf.vertexUnits[location].enabled
-                    @gl.disableVertexAttribArray location
-        return
+                );
+            } else {
+                if (this.gf.vertexUnits[location].enabled) {
+                    this.gl.disableVertexAttribArray(location);
+                }
+            }
+        }
+    }
 
-    setupVertexBuffer: ->
-        if @vao?
-            @gf.vao.bindVertexArrayOES @vao
-        else
-            @setPointers()
+    setupVertexBuffer() {
+        if (this.vao != null) {
+            return this.gf.vao.bindVertexArrayOES(this.vao);
+        } else {
+            return this.setPointers();
+        }
+    }
 
-    setupState: ->
-        if @depthTest
-            @gl.enable @gl.DEPTH_TEST
-            @gl.depthFunc @depthFunc
-        else
-            @gl.disable @gl.DEPTH_TEST
+    setupState() {
+        if (this.depthTest) {
+            this.gl.enable(this.gl.DEPTH_TEST);
+            this.gl.depthFunc(this.depthFunc);
+        } else {
+            this.gl.disable(this.gl.DEPTH_TEST);
+        }
 
-        @gl.depthMask @depthWrite
-        @gl.colorMask @colorWrite[0], @colorWrite[1], @colorWrite[2], @colorWrite[3]
+        this.gl.depthMask(this.depthWrite);
+        this.gl.colorMask(this.colorWrite[0], this.colorWrite[1], this.colorWrite[2], this.colorWrite[3]);
 
-        if @cullFace
-            @gl.enable @gl.CULL_FACE
-            @gl.cullFace @cullFace
-        else
-            @gl.disable @gl.CULL_FACE
+        if (this.cullFace) {
+            this.gl.enable(this.gl.CULL_FACE);
+            this.gl.cullFace(this.cullFace);
+        } else {
+            this.gl.disable(this.gl.CULL_FACE);
+        }
 
-        if @blend?
-            @blend()
-        else
-            @gl.disable @gl.BLEND
+        if (this.blend != null) {
+            this.blend();
+        } else {
+            this.gl.disable(this.gl.BLEND);
+        }
 
-        if @vertexbuffer.mode is @gl.LINES or @vertexbuffer.mode is @gl.LINE_STRIP
-            if @gf.lineWidth isnt @lineWidth
-                @gf.lineWidth = @lineWidth
-                @gl.lineWidth @lineWidth
+        if ((this.vertexbuffer.mode === this.gl.LINES) || (this.vertexbuffer.mode === this.gl.LINE_STRIP)) {
+            if (this.gf.lineWidth !== this.lineWidth) {
+                this.gf.lineWidth = this.lineWidth;
+                this.gl.lineWidth(this.lineWidth);
+            }
+        }
         
-        @shader.use()
+        this.shader.use();
 
-        @setupVertexBuffer()
+        this.setupVertexBuffer();
 
-        @gf.currentState = @
+        return this.gf.currentState = this;
+    }
 
-    draw: (first, count) ->
-        if @framebuffer?
-            @framebuffer.viewport()
-        else
-            @setViewport()
+    draw(first, count) {
+        if (this.framebuffer != null) {
+            this.framebuffer.viewport();
+        } else {
+            this.setViewport();
+        }
         
-        if @framebuffer?
-            @framebuffer.use()
-        else
-            if @gf.currentFramebuffer?
-                @gf.currentFramebuffer.unuse()
+        if (this.framebuffer != null) {
+            this.framebuffer.use();
+        } else {
+            if (this.gf.currentFramebuffer != null) {
+                this.gf.currentFramebuffer.unuse();
+            }
+        }
         
-        for texture, unit in @textures #FIXME
-            texture.texture.bind(unit)
-            @int texture.name, unit
+        for (let unit = 0; unit < this.textures.length; unit++) { //FIXME
+            const texture = this.textures[unit];
+            texture.texture.bind(unit);
+            this.int(texture.name, unit);
+        }
         
-        if @gf.currentState isnt @
-            @setupState()
+        if (this.gf.currentState !== this) {
+            this.setupState();
+        }
 
-        @vertexbuffer.draw(first, count)
+        this.vertexbuffer.draw(first, count);
 
-        return @
+        return this;
+    }
 
-    mat4: (name, value) ->
-        @shader.mat4 name, value
-        return @
+    mat4(name, value) {
+        this.shader.mat4(name, value);
+        return this;
+    }
     
-    mat3: (name, value) ->
-        @shader.mat3 name, value
-        return @
+    mat3(name, value) {
+        this.shader.mat3(name, value);
+        return this;
+    }
 
-    int: (name, value) ->
-        @shader.int name, value
-        return @
+    int(name, value) {
+        this.shader.int(name, value);
+        return this;
+    }
     
-    vec2: (name, a, b) ->
-        @shader.vec2 name, a, b
-        return @
+    vec2(name, a, b) {
+        this.shader.vec2(name, a, b);
+        return this;
+    }
 
-    vec3: (name, a, b, c) ->
-        @shader.vec3 name, a, b, c
-        return @
+    vec3(name, a, b, c) {
+        this.shader.vec3(name, a, b, c);
+        return this;
+    }
     
-    vec4: (name, a, b, c, d) ->
-        @shader.vec4 name, a, b, c, d
-        return @
+    vec4(name, a, b, c, d) {
+        this.shader.vec4(name, a, b, c, d);
+        return this;
+    }
 
-    uniformSetter: (obj) ->
-        @shader.uniformSetter obj
-        return @
+    uniformSetter(obj) {
+        this.shader.uniformSetter(obj);
+        return this;
+    }
 
-    float: (name, value) ->
-        @shader.float name, value
-        return @
+    float(name, value) {
+        this.shader.float(name, value);
+        return this;
+    }
 
-    sampler: (name, texture) ->
-        stored = @texturesByName[name]
-        if not stored?
-            stored = name:name, texture:texture
-            @texturesByName[name] = stored
-            @textures.push stored
+    sampler(name, texture) {
+        let stored = this.texturesByName[name];
+        if ((stored == null)) {
+            stored = {name, texture};
+            this.texturesByName[name] = stored;
+            this.textures.push(stored);
+        }
 
-        if stored.texture isnt texture
-            stored.texture = texture
+        if (stored.texture !== texture) {
+            stored.texture = texture;
+        }
 
-        return @
+        return this;
+    }
 
-    bind: (unit=0) ->
-        if @framebuffer?
-            @framebuffer.bind unit
-        else
-            throw new Error('State has no attached framebuffer')
+    bind(unit) {
+        if (unit == null) { unit = 0; }
+        if (this.framebuffer != null) {
+            this.framebuffer.bind(unit);
+        } else {
+            throw new Error('State has no attached framebuffer');
+        }
 
-        return @
+        return this;
+    }
 
-    generateMipmap: ->
-        if @framebuffer?
-            @framebuffer.generateMipmap()
-        else
-            throw new Error('State has no attached framebuffer')
+    generateMipmap() {
+        if (this.framebuffer != null) {
+            this.framebuffer.generateMipmap();
+        } else {
+            throw new Error('State has no attached framebuffer');
+        }
 
-        return @
+        return this;
+    }
 
-    anisotropy: ->
-        if @framebuffer?
-            @framebuffer.anisotropy()
-        else
-            throw new Error('State has no attached framebuffer')
+    anisotropy() {
+        if (this.framebuffer != null) {
+            this.framebuffer.anisotropy();
+        } else {
+            throw new Error('State has no attached framebuffer');
+        }
 
-        return @
+        return this;
+    }
 
-    vertices: (data) ->
-        @vertexbuffer.vertices data
-        return @
+    vertices(data) {
+        this.vertexbuffer.vertices(data);
+        return this;
+    }
 
-    cubeSide: (name) ->
-        if @framebuffer?
-            @framebuffer.cubeSide(name)
-        else
-            throw new Error('State has no attached framebuffer')
-        return @
+    cubeSide(name) {
+        if (this.framebuffer != null) {
+            this.framebuffer.cubeSide(name);
+        } else {
+            throw new Error('State has no attached framebuffer');
+        }
+        return this;
+    }
+});

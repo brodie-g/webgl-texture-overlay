@@ -1,183 +1,241 @@
-if window.WebGLRenderingContext?
-    vendors = ['WEBKIT', 'MOZ', 'MS', 'O']
-    vendorRe = /^WEBKIT_(.*)|MOZ_(.*)|MS_(.*)|O_(.*)/
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let getExtension, getSupportedExtensions, WebGLFramework;
+if (window.WebGLRenderingContext != null) {
+    const vendors = ['WEBKIT', 'MOZ', 'MS', 'O'];
+    const vendorRe = /^WEBKIT_(.*)|MOZ_(.*)|MS_(.*)|O_(.*)/;
 
-    getExtension = WebGLRenderingContext.prototype.getExtension
-    WebGLRenderingContext.prototype.getExtension = (name) ->
-        match = name.match vendorRe
-        if match != null
-            name = match[1]
+    ({ getExtension } = WebGLRenderingContext.prototype);
+    WebGLRenderingContext.prototype.getExtension = function(name) {
+        const match = name.match(vendorRe);
+        if (match !== null) {
+            name = match[1];
+        }
 
-        extobj = getExtension.call @, name
-        if extobj == null
-            for vendor in vendors
-                extobj = getExtension.call @, vendor + '_' + name
-                if extobj != null
-                    return extobj
-            return null
-        else
-            return extobj
+        let extobj = getExtension.call(this, name);
+        if (extobj === null) {
+            for (let vendor of Array.from(vendors)) {
+                extobj = getExtension.call(this, vendor + '_' + name);
+                if (extobj !== null) {
+                    return extobj;
+                }
+            }
+            return null;
+        } else {
+            return extobj;
+        }
+    };
 
-    getSupportedExtensions = WebGLRenderingContext.prototype.getSupportedExtensions
-    WebGLRenderingContext.prototype.getSupportedExtensions = ->
-        supported = getSupportedExtensions.call @
-        result = []
+    ({ getSupportedExtensions } = WebGLRenderingContext.prototype);
+    WebGLRenderingContext.prototype.getSupportedExtensions = function() {
+        const supported = getSupportedExtensions.call(this);
+        const result = [];
 
-        for extension in supported
-            match = extension.match vendorRe
-            if match != null
-                extension = match[1]
+        for (let extension of Array.from(supported)) {
+            const match = extension.match(vendorRe);
+            if (match !== null) {
+                extension = match[1];
+            }
 
-            if extension not in result
-                result.push extension
+            if (!Array.from(result).includes(extension)) {
+                result.push(extension);
+            }
+        }
 
-        return result
+        return result;
+    };
+}
 
-shims = require 'shims'
-textureFloat = require 'texture-float'
-texture = require 'texture'
-matrix = require 'matrix'
-vector = require 'vector'
+const shims = require('shims');
+const textureFloat = require('texture-float');
+const texture = require('texture');
+const matrix = require('matrix');
+const vector = require('vector');
 
-State = require 'state'
-VertexBuffer = require 'vertexbuffer'
-{Shader, ShaderProxy} = require 'shader'
-framebuffer = require 'framebuffer'
+const State = require('state');
+const VertexBuffer = require('vertexbuffer');
+const {Shader, ShaderProxy} = require('shader');
+const framebuffer = require('framebuffer');
 
-exports = class WebGLFramework
-    constructor: (params={}) ->
-        debug = params.debug ? false
-        delete params.debug
+const exports = (WebGLFramework = class WebGLFramework {
+    constructor(params) {
+        if (params == null) { params = {}; }
+        const debug = params.debug != null ? params.debug : false;
+        delete params.debug;
         
-        perf = params.perf ? false
-        delete params.perf
+        const perf = params.perf != null ? params.perf : false;
+        delete params.perf;
 
-        @canvas = params.canvas ? document.createElement('canvas')
-        delete params.canvas
+        this.canvas = params.canvas != null ? params.canvas : document.createElement('canvas');
+        delete params.canvas;
 
-        @gl = @getContext 'webgl', params
+        this.gl = this.getContext('webgl', params);
 
-        if not @gl?
-            @gl = @getContext 'experimental-webgl'
+        if ((this.gl == null)) {
+            this.gl = this.getContext('experimental-webgl');
+        }
 
-        if not @gl?
-            throw new Error 'WebGL is not supported'
+        if ((this.gl == null)) {
+            throw new Error('WebGL is not supported');
+        }
 
-        @textureFloat = textureFloat(@gl)
+        this.textureFloat = textureFloat(this.gl);
         
-        # might be slower than manual pointer handling
-        #if @haveExtension('OES_vertex_array_object')
-        #    @vao = @gl.getExtension('OES_vertex_array_object')
-        #else
-        #    @vao = null
-        @vao = null
+        // might be slower than manual pointer handling
+        //if @haveExtension('OES_vertex_array_object')
+        //    @vao = @gl.getExtension('OES_vertex_array_object')
+        //else
+        //    @vao = null
+        this.vao = null;
 
-        if window.WebGLPerfContext? and perf
-            console.log 'webgl perf context enabled'
-            @gl = new WebGLPerfContext.create @gl
-        else if window.WebGLDebugUtils? and debug
-            console.log 'webgl debug enabled'
-            @gl = WebGLDebugUtils.makeDebugContext @gl, (err, funcName, args) ->
-                throw WebGLDebugUtils.glEnumToString(err) + " was caused by call to: " + funcName
+        if ((window.WebGLPerfContext != null) && perf) {
+            console.log('webgl perf context enabled');
+            this.gl = new WebGLPerfContext.create(this.gl);
+        } else if ((window.WebGLDebugUtils != null) && debug) {
+            console.log('webgl debug enabled');
+            this.gl = WebGLDebugUtils.makeDebugContext(this.gl, function(err, funcName, args) {
+                throw WebGLDebugUtils.glEnumToString(err) + " was caused by call to: " + funcName;
+            });
+        }
 
-        @currentVertexBuffer = null
-        @currentShader = null
-        @currentFramebuffer = null
-        @currentState = null
+        this.currentVertexBuffer = null;
+        this.currentShader = null;
+        this.currentFramebuffer = null;
+        this.currentState = null;
 
-        @maxAttribs = @gl.getParameter @gl.MAX_VERTEX_ATTRIBS
-        @vertexUnits = for i in [0...@maxAttribs]
-            {enabled:false, pointer:null, location:i}
+        this.maxAttribs = this.gl.getParameter(this.gl.MAX_VERTEX_ATTRIBS);
+        this.vertexUnits = __range__(0, this.maxAttribs, false).map((i) => (
+            {enabled:false, pointer:null, location:i}));
 
-        @lineWidth = 1
+        this.lineWidth = 1;
 
-        @quadVertices = @vertexbuffer
+        this.quadVertices = this.vertexbuffer({
             pointers: [
                 {name:'position', size:2}
-            ]
+            ],
             vertices: [
                 -1, -1,  1, -1,  1,  1,
                 -1,  1, -1, -1,  1,  1,
-            ]
+            ]});
 
-        @blit = @state
-            shader: fs.open('blit.shader')
+        this.blit = this.state({
+            shader: fs.open('blit.shader')});
+    }
 
-    haveExtension: (search) ->
-        for name in @gl.getSupportedExtensions()
-            if name.indexOf(search) >= 0
-                return true
-        return false
+    haveExtension(search) {
+        for (let name of Array.from(this.gl.getSupportedExtensions())) {
+            if (name.indexOf(search) >= 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-    getContext: (name, params) ->
-        try
-            return @canvas.getContext(name, params)
-        catch error
-            return null
+    getContext(name, params) {
+        try {
+            return this.canvas.getContext(name, params);
+        } catch (error) {
+            return null;
+        }
+    }
 
-    state: (params) -> new State(@, params)
-    vertexbuffer: (params) -> new VertexBuffer(@, params)
-    framebuffer: (params) ->
-        if params.type?
-            if params.type == '2d'
-                new framebuffer.Framebuffer2D(@, params)
-            else if params.type == 'cube'
-                new framebuffer.FramebufferCube(@, params)
-            else
-                throw new Error('unknown framebuffer type: ' + params.type)
+    state(params) { return new State(this, params); }
+    vertexbuffer(params) { return new VertexBuffer(this, params); }
+    framebuffer(params) {
+        if (params.type != null) {
+            if (params.type === '2d') {
+                return new framebuffer.Framebuffer2D(this, params);
+            } else if (params.type === 'cube') {
+                return new framebuffer.FramebufferCube(this, params);
+            } else {
+                throw new Error(`unknown framebuffer type: ${params.type}`);
+            }
 
-        else
-            new framebuffer.Framebuffer2D(@, params)
+        } else {
+            return new framebuffer.Framebuffer2D(this, params);
+        }
+    }
 
-    shader: (params) -> new Shader(@, params)
-    shaderProxy: (shader) -> new ShaderProxy(shader)
+    shader(params) { return new Shader(this, params); }
+    shaderProxy(shader) { return new ShaderProxy(shader); }
 
-    mat4: (view) -> new matrix.Mat4(view)
-    mat3: (view) -> new matrix.Mat3(view)
-    vec3: (x, y, z) -> new vector.Vec3(x,y,z)
+    mat4(view) { return new matrix.Mat4(view); }
+    mat3(view) { return new matrix.Mat3(view); }
+    vec3(x, y, z) { return new vector.Vec3(x,y,z); }
 
-    clearColor: (r, g, b, a) ->
-        @gl.clearColor(r, g, b, a)
-        @gl.clear(@gl.COLOR_BUFFER_BIT)
-        return @
+    clearColor(r, g, b, a) {
+        this.gl.clearColor(r, g, b, a);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+        return this;
+    }
     
-    clearDepth: (value=1) ->
-        @gl.clearDepth value
-        @gl.clear @gl.DEPTH_BUFFER_BIT
-        return @
+    clearDepth(value) {
+        if (value == null) { value = 1; }
+        this.gl.clearDepth(value);
+        this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
+        return this;
+    }
 
-    frameStart: ->
-        if fullscreen.element()?
-            factor = 1
-        else
-            factor = 2
+    frameStart() {
+        let factor;
+        if (fullscreen.element() != null) {
+            factor = 1;
+        } else {
+            factor = 2;
+        }
             
-        if @canvas.offsetWidth*factor != @canvas.width
-            @canvas.width = @canvas.offsetWidth*factor
+        if ((this.canvas.offsetWidth*factor) !== this.canvas.width) {
+            this.canvas.width = this.canvas.offsetWidth*factor;
+        }
         
-        if @canvas.offsetHeight*factor != @canvas.height
-            @canvas.height = @canvas.offsetHeight*factor
+        if ((this.canvas.offsetHeight*factor) !== this.canvas.height) {
+            this.canvas.height = this.canvas.offsetHeight*factor;
+        }
 
-        if @gl.performance?
-            @gl.performance.start()
-        return @
+        if (this.gl.performance != null) {
+            this.gl.performance.start();
+        }
+        return this;
+    }
 
-    frameEnd: ->
-        if @gl.performance?
-            @gl.performance.stop()
-        return @
+    frameEnd() {
+        if (this.gl.performance != null) {
+            this.gl.performance.stop();
+        }
+        return this;
+    }
     
-    texture2D: (params) ->
-        return new texture.Texture2D @, params
+    texture2D(params) {
+        return new texture.Texture2D(this, params);
+    }
     
-    textureCube: (params) ->
-        return new texture.TextureCube @, params
+    textureCube(params) {
+        return new texture.TextureCube(this, params);
+    }
 
-    getExtension: (name) ->
-        @gl.getExtension name
+    getExtension(name) {
+        return this.gl.getExtension(name);
+    }
 
-    htmlColor2Vec: (value) ->
-        r = parseInt(value[...2], 16)/255
-        g = parseInt(value[2...4], 16)/255
-        b = parseInt(value[4...], 16)/255
-        return {r:r, g:g, b:b}
+    htmlColor2Vec(value) {
+        const r = parseInt(value.slice(0, 2), 16)/255;
+        const g = parseInt(value.slice(2, 4), 16)/255;
+        const b = parseInt(value.slice(4), 16)/255;
+        return {r, g, b};
+    }
+});
+
+function __range__(left, right, inclusive) {
+  let range = [];
+  let ascending = left < right;
+  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
+  for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
+    range.push(i);
+  }
+  return range;
+}

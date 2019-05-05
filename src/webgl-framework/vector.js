@@ -1,19 +1,29 @@
-tau = Math.PI*2
+/*
+ * decaffeinate suggestions:
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let Vec3;
+const tau = Math.PI*2;
 
-exports.Vec3 = class Vec3
-    constructor: (@x=0, @y=0, @z=0) -> null
+let defaultExport = {};
+defaultExport.Vec3 = (Vec3 = class Vec3 {
+    constructor(x, y, z) { if (x == null) { x = 0; } this.x = x; if (y == null) { y = 0; } this.y = y; if (z == null) { z = 0; } this.z = z; null; }
 
-    set: (@x=0, @y=0, @z=0) -> return @
+    set(x, y, z) { if (x == null) { x = 0; } this.x = x; if (y == null) { y = 0; } this.y = y; if (z == null) { z = 0; } this.z = z; return this; }
 
-    rotatey: (angle) ->
-        rad = tau*(angle/360)
-        s = Math.sin rad
-        c = Math.cos rad
+    rotatey(angle) {
+        const rad = tau*(angle/360);
+        const s = Math.sin(rad);
+        const c = Math.cos(rad);
 
-        x = @z*s + @x*c
-        z = @z*c - @x*s
+        const x = (this.z*s) + (this.x*c);
+        const z = (this.z*c) - (this.x*s);
 
-        @x = x
-        @z = z
+        this.x = x;
+        this.z = z;
         
-        return @
+        return this;
+    }
+});
+export default defaultExport;

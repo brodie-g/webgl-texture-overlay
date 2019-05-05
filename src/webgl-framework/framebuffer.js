@@ -1,120 +1,184 @@
-texture = require 'texture'
+/*
+ * decaffeinate suggestions:
+ * DS001: Remove Babel/TypeScript constructor workaround
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let Framebuffer, FramebufferCube;
+import texture from 'texture';
 
-exports.Framebuffer = class Framebuffer
-    constructor: (@gf, params={}) ->
-        @gl = @gf.gl
-        @buffer = @gl.createFramebuffer()
+let defaultExport = {};
+defaultExport.Framebuffer = (Framebuffer = class Framebuffer {
+    constructor(gf, params) {
+        this.gf = gf;
+        if (params == null) { params = {}; }
+        this.gl = this.gf.gl;
+        this.buffer = this.gl.createFramebuffer();
+    }
 
-    generateMipmap: ->
-        @colorTexture.generateMipmap()
+    generateMipmap() {
+        return this.colorTexture.generateMipmap();
+    }
 
-    anisotropy: ->
-        @colorTexture.anisotropy()
+    anisotropy() {
+        return this.colorTexture.anisotropy();
+    }
     
-    bind: (unit=0) ->
-        @colorTexture.bind unit
+    bind(unit) {
+        if (unit == null) { unit = 0; }
+        return this.colorTexture.bind(unit);
+    }
     
-    check: ->
-        result = @gl.checkFramebufferStatus @gl.FRAMEBUFFER
-        switch result
-            when @gl.FRAMEBUFFER_UNSUPPORTED
-                throw 'Framebuffer is unsupported'
-            when @gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT
-                throw 'Framebuffer incomplete attachment'
-            when @gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS
-                throw 'Framebuffer incomplete dimensions'
-            when @gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT
-                throw 'Framebuffer incomplete missing attachment'
-        return @
+    check() {
+        const result = this.gl.checkFramebufferStatus(this.gl.FRAMEBUFFER);
+        switch (result) {
+            case this.gl.FRAMEBUFFER_UNSUPPORTED:
+                throw 'Framebuffer is unsupported';
+                break;
+            case this.gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                throw 'Framebuffer incomplete attachment';
+                break;
+            case this.gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+                throw 'Framebuffer incomplete dimensions';
+                break;
+            case this.gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                throw 'Framebuffer incomplete missing attachment';
+                break;
+        }
+        return this;
+    }
     
-    unuse: ->
-        if @gf.currentFramebuffer?
-            @gf.currentFramebuffer = null
-            @gl.bindFramebuffer @gl.FRAMEBUFFER, null
-        return @
+    unuse() {
+        if (this.gf.currentFramebuffer != null) {
+            this.gf.currentFramebuffer = null;
+            this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+        }
+        return this;
+    }
+});
     
-exports.Framebuffer2D = class Framebuffer extends exports.Framebuffer
-    constructor: (@gf, params={}) ->
-        super(@gf, params)
-        if params.color?
-            if params.color instanceof texture.Texture
-                @color params.color
-                @ownColor = false
-            else
-                @color @gf.texture2D params.color
-                @ownColor = true
-        else
-            @ownColor = false
+defaultExport.Framebuffer2D = (Framebuffer = class Framebuffer extends defaultExport.Framebuffer {
+    constructor(gf, params) {
+        {
+          // Hack: trick Babel/TypeScript into allowing this before super.
+          if (false) { super(); }
+          let thisFn = (() => { return this; }).toString();
+          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
+          eval(`${thisName} = this;`);
+        }
+        this.gf = gf;
+        if (params == null) { params = {}; }
+        super(this.gf, params);
+        if (params.color != null) {
+            if (params.color instanceof texture.Texture) {
+                this.color(params.color);
+                this.ownColor = false;
+            } else {
+                this.color(this.gf.texture2D(params.color));
+                this.ownColor = true;
+            }
+        } else {
+            this.ownColor = false;
+        }
+    }
 
-    color: (@colorTexture) ->
-        @use()
-        @gl.framebufferTexture2D @gl.FRAMEBUFFER, @gl.COLOR_ATTACHMENT0, @colorTexture.target, @colorTexture.handle, 0
-        @check()
-        @unuse()
-        return @
+    color(colorTexture) {
+        this.colorTexture = colorTexture;
+        this.use();
+        this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.colorTexture.target, this.colorTexture.handle, 0);
+        this.check();
+        this.unuse();
+        return this;
+    }
     
-    use: ->
-        if @gf.currentFramebuffer isnt @
-            @gf.currentFramebuffer = @
-            @gl.bindFramebuffer @gl.FRAMEBUFFER, @buffer
-        return @
+    use() {
+        if (this.gf.currentFramebuffer !== this) {
+            this.gf.currentFramebuffer = this;
+            this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.buffer);
+        }
+        return this;
+    }
 
-    viewport: (width, height) ->
-        width ?= @colorTexture.width
-        height ?= @colorTexture.height
-        @gl.viewport 0, 0, width, height
+    viewport(width, height) {
+        if (width == null) { ({ width } = this.colorTexture); }
+        if (height == null) { ({ height } = this.colorTexture); }
+        return this.gl.viewport(0, 0, width, height);
+    }
     
-    destroy: ->
-        @gl.deleteFramebuffer @buffer
-        if @ownColor
-            @color.destroy()
+    destroy() {
+        this.gl.deleteFramebuffer(this.buffer);
+        if (this.ownColor) {
+            this.color.destroy();
+        }
 
-        return @
+        return this;
+    }
+});
 
-exports.FramebufferCube = class FramebufferCube extends exports.Framebuffer
-    constructor: (@gf, params) ->
-        super(@gf, params)
+defaultExport.FramebufferCube = (FramebufferCube = class FramebufferCube extends defaultExport.Framebuffer {
+    constructor(gf, params) {
+        {
+          // Hack: trick Babel/TypeScript into allowing this before super.
+          if (false) { super(); }
+          let thisFn = (() => { return this; }).toString();
+          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
+          eval(`${thisName} = this;`);
+        }
+        this.gf = gf;
+        super(this.gf, params);
 
-        @negativeX = new exports.Framebuffer2D(@gf)
-        @negativeY = new exports.Framebuffer2D(@gf)
-        @negativeZ = new exports.Framebuffer2D(@gf)
-        @positiveX = new exports.Framebuffer2D(@gf)
-        @positiveY = new exports.Framebuffer2D(@gf)
-        @positiveZ = new exports.Framebuffer2D(@gf)
+        this.negativeX = new defaultExport.Framebuffer2D(this.gf);
+        this.negativeY = new defaultExport.Framebuffer2D(this.gf);
+        this.negativeZ = new defaultExport.Framebuffer2D(this.gf);
+        this.positiveX = new defaultExport.Framebuffer2D(this.gf);
+        this.positiveY = new defaultExport.Framebuffer2D(this.gf);
+        this.positiveZ = new defaultExport.Framebuffer2D(this.gf);
 
-        @currentSide = @negativeX
+        this.currentSide = this.negativeX;
         
-        color = params.color
-        if color?
-            if params.color instanceof texture.Texture
-                @color params.color
-            else
-                @color @gf.textureCube params.color
+        const { color } = params;
+        if (color != null) {
+            if (params.color instanceof texture.Texture) {
+                this.color(params.color);
+            } else {
+                this.color(this.gf.textureCube(params.color));
+            }
+        }
+    }
 
-    color: (@colorTexture) ->
-        @negativeX.color(@colorTexture.negativeX)
-        @negativeY.color(@colorTexture.negativeY)
-        @negativeZ.color(@colorTexture.negativeZ)
-        @positiveX.color(@colorTexture.positiveX)
-        @positiveY.color(@colorTexture.positiveY)
-        @positiveZ.color(@colorTexture.positiveZ)
+    color(colorTexture) {
+        this.colorTexture = colorTexture;
+        this.negativeX.color(this.colorTexture.negativeX);
+        this.negativeY.color(this.colorTexture.negativeY);
+        this.negativeZ.color(this.colorTexture.negativeZ);
+        this.positiveX.color(this.colorTexture.positiveX);
+        this.positiveY.color(this.colorTexture.positiveY);
+        return this.positiveZ.color(this.colorTexture.positiveZ);
+    }
 
-    destroy: ->
-        @negativeX.destroy()
-        @negativeY.destroy()
-        @negativeZ.destroy()
-        @positiveX.destroy()
-        @positiveY.destroy()
-        @positiveZ.destroy()
+    destroy() {
+        this.negativeX.destroy();
+        this.negativeY.destroy();
+        this.negativeZ.destroy();
+        this.positiveX.destroy();
+        this.positiveY.destroy();
+        return this.positiveZ.destroy();
+    }
 
-    cubeSide: (name) ->
-        @currentSide = @[name]
+    cubeSide(name) {
+        return this.currentSide = this[name];
+    }
 
-    use: ->
-        @currentSide.use()
+    use() {
+        return this.currentSide.use();
+    }
     
-    viewport: (width, height) ->
-        width ?= @colorTexture.size
-        height ?= @colorTexture.size
-        @gl.viewport 0, 0, width, height
+    viewport(width, height) {
+        if (width == null) { width = this.colorTexture.size; }
+        if (height == null) { height = this.colorTexture.size; }
+        return this.gl.viewport(0, 0, width, height);
+    }
+});
+export default defaultExport;
     
