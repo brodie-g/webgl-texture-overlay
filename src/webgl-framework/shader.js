@@ -8,11 +8,9 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let Shader, ShaderObj, ShaderProxy;
 import matrix from'./matrix';
 
-let defaultExport = {};
-defaultExport.ShaderObj = (ShaderObj = class ShaderObj {});
+export class ShaderObj {}
 
 const boilerplate = `\
 precision highp int;
@@ -64,7 +62,7 @@ vec2 linstepOpen(vec2 edge0, vec2 edge1, vec2 value){
 }\
 `;
 
-defaultExport.Shader = (Shader = class Shader extends ShaderObj {
+export class Shader extends ShaderObj {
     constructor(gf, params) {
         {
           // Hack: trick Babel/TypeScript into allowing this before super.
@@ -350,9 +348,9 @@ defaultExport.Shader = (Shader = class Shader extends ShaderObj {
         }
         return this;
     }
-});
+}
 
-defaultExport.ShaderProxy = (ShaderProxy = class ShaderProxy extends ShaderObj {
+export class ShaderProxy extends ShaderObj {
     constructor(shader=null) {
         {
           // Hack: trick Babel/TypeScript into allowing this before super.
@@ -411,5 +409,4 @@ defaultExport.ShaderProxy = (ShaderProxy = class ShaderProxy extends ShaderObj {
         this.shader.float(name, value);
         return this;
     }
-});
-export default defaultExport;
+}

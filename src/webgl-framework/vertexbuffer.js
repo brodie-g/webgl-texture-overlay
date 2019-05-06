@@ -89,3 +89,5 @@ const exports = (VertexBuffer = class VertexBuffer {
         return this;
     }
 });
+
+export default exports;

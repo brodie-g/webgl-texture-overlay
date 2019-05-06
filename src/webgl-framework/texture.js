@@ -57,7 +57,7 @@ class ConcreteTexture extends defaultExport.Texture {
             } else {
                 throw new Error(`unknown S clamp mode: ${clamp.s}`);
             }
-            
+
             if (clamp.t === 'edge') {
                 tClamp = this.gl.CLAMP_TO_EDGE;
             } else if (clamp.t === 'repeat') {
@@ -74,14 +74,14 @@ class ConcreteTexture extends defaultExport.Texture {
     destroy() {
         return this.gl.deleteTexture(this.handle);
     }
-    
+
     generateMipmap() {
         this.mipmapped = true;
         this.bind();
         this.gl.generateMipmap(this.target);
         return this;
     }
-    
+
     anisotropy() {
         this.anisotropic = true;
         const ext = this.gl.getExtension('EXT_texture_filter_anisotropic');
@@ -90,7 +90,7 @@ class ConcreteTexture extends defaultExport.Texture {
             return this.gl.texParameterf(this.target, ext.TEXTURE_MAX_ANISOTROPY_EXT, max);
         }
     }
-    
+
     linear() {
         this.bind();
 
@@ -98,7 +98,7 @@ class ConcreteTexture extends defaultExport.Texture {
         this.gl.texParameteri(this.target, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
         return this;
     }
-    
+
     nearest() {
         this.bind();
 
@@ -106,7 +106,7 @@ class ConcreteTexture extends defaultExport.Texture {
         this.gl.texParameteri(this.target, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         return this;
     }
-    
+
     repeat() {
         this.bind();
 
@@ -114,7 +114,7 @@ class ConcreteTexture extends defaultExport.Texture {
         this.gl.texParameteri(this.target, this.gl.TEXTURE_WRAP_T, this.gl.REPEAT);
         return this;
     }
-    
+
     edge() {
         this.bind();
 
@@ -122,7 +122,7 @@ class ConcreteTexture extends defaultExport.Texture {
         this.gl.texParameteri(this.target, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
         return this;
     }
-    
+
     bind(unit) {
         if (unit == null) { unit = 0; }
         this.gl.activeTexture(this.gl.TEXTURE0+unit);
@@ -166,7 +166,7 @@ defaultExport.TextureCube = (TextureCube = class TextureCube extends ConcreteTex
         this.positiveZ = new CubeSide(this.handle, this.gl.TEXTURE_CUBE_MAP_POSITIVE_Z);
 
         this.size(params.size);
-        
+
         if ([this.gl.NEAREST_MIPMAP_NEAREST, this.gl.LINEAR_MIPMAP_NEAREST, this.gl.NEAREST_MIPMAP_LINEAR, this.gl.LINEAR_MIPMAP_LINEAR].includes(this.minify)) {
             this.generateMipmap();
         }
@@ -184,7 +184,7 @@ defaultExport.TextureCube = (TextureCube = class TextureCube extends ConcreteTex
 
         return this;
     }
-    
+
     dataSized(data, side, size) {
         this.size = size;
         this.bind();
@@ -238,7 +238,7 @@ defaultExport.Texture2D = (Texture2D = class Texture2D extends ConcreteTexture {
         this.gl.texImage2D(this.target, 0, this.channels, this.channels, this.type, data);
         return this;
     }
-    
+
     dataSized(data, width, height, unpackAlignment) {
         if (unpackAlignment == null) { unpackAlignment = 1; }
         this.bind();
@@ -258,7 +258,7 @@ defaultExport.Texture2D = (Texture2D = class Texture2D extends ConcreteTexture {
         this.gl.texImage2D(this.target, 0, this.channels, this.width, this.height, 0, this.channels, this.type, null);
         return this;
     }
-    
+
     draw(scale) {
         if (scale == null) { scale = 1; }
         return this.gf.blit

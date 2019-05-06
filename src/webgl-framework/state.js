@@ -378,3 +378,5 @@ const exports = (State = class State {
         return this;
     }
 });
+
+export default exports;

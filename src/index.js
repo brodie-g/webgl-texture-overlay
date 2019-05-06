@@ -7,9 +7,11 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import tessellate from '../lib/tessellate';
 import WebGLFramework from'./webgl-framework';
 import layer from'./texture-layer';
 import ClipRegion from'./clip';
+
 
 class WebGLTextureOverlay {
     constructor() {
@@ -140,10 +142,8 @@ class WebGLTextureOverlay {
 
     addLayer(params) {
         this.dirty = true;
-        layer = new layer.Video(this, params);
+        const layer = new layer.Video(this, params);
         this.layers.push(layer);
         return layer;
     }
 }
-
-L.webglTextureOverlay = () => new WebGLTextureOverlay();

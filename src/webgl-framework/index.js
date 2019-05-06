@@ -53,23 +53,23 @@ if (window.WebGLRenderingContext != null) {
     };
 }
 
-const shims = require('shims');
-const textureFloat = require('texture-float');
-const texture = require('texture');
-const matrix = require('matrix');
-const vector = require('vector');
+const shims = require('./shims');
+const textureFloat = require('./texture-float');
+const texture = require('./texture');
+const matrix = require('./matrix');
+const vector = require('./vector');
 
-const State = require('state');
-const VertexBuffer = require('vertexbuffer');
-const {Shader, ShaderProxy} = require('shader');
-const framebuffer = require('framebuffer');
+const State = require('./state');
+const VertexBuffer = require('./vertexbuffer');
+const {Shader, ShaderProxy} = require('./shader');
+const framebuffer = require('./framebuffer');
 
 const exports = (WebGLFramework = class WebGLFramework {
     constructor(params) {
         if (params == null) { params = {}; }
         const debug = params.debug != null ? params.debug : false;
         delete params.debug;
-        
+
         const perf = params.perf != null ? params.perf : false;
         delete params.perf;
 
@@ -87,7 +87,7 @@ const exports = (WebGLFramework = class WebGLFramework {
         }
 
         this.textureFloat = textureFloat(this.gl);
-        
+
         // might be slower than manual pointer handling
         //if @haveExtension('OES_vertex_array_object')
         //    @vao = @gl.getExtension('OES_vertex_array_object')
@@ -175,7 +175,7 @@ const exports = (WebGLFramework = class WebGLFramework {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         return this;
     }
-    
+
     clearDepth(value) {
         if (value == null) { value = 1; }
         this.gl.clearDepth(value);
@@ -190,11 +190,11 @@ const exports = (WebGLFramework = class WebGLFramework {
         } else {
             factor = 2;
         }
-            
+
         if ((this.canvas.offsetWidth*factor) !== this.canvas.width) {
             this.canvas.width = this.canvas.offsetWidth*factor;
         }
-        
+
         if ((this.canvas.offsetHeight*factor) !== this.canvas.height) {
             this.canvas.height = this.canvas.offsetHeight*factor;
         }
@@ -211,11 +211,11 @@ const exports = (WebGLFramework = class WebGLFramework {
         }
         return this;
     }
-    
+
     texture2D(params) {
         return new texture.Texture2D(this, params);
     }
-    
+
     textureCube(params) {
         return new texture.TextureCube(this, params);
     }
