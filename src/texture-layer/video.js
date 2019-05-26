@@ -8,10 +8,9 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let TextureVideoLayer;
 import BaseLayer from'./base';
 
-const exports = (TextureVideoLayer = class TextureVideoLayer extends BaseLayer {
+class TextureVideoLayer extends BaseLayer {
     constructor(parent, params) {
         {
           // Hack: trick Babel/TypeScript into allowing this before super.
@@ -93,22 +92,22 @@ const exports = (TextureVideoLayer = class TextureVideoLayer extends BaseLayer {
 
         for (name of ['nearest', 'lerp', 'smoothstep', 'euclidian', 'classicBicubic', 'hex-nearest', 'hex-linear', 'hex-smoothstep']) {
             shaders[name] = [
-                fs.open(`texfuns/tween/${fadeFun}.shader`),
-                fs.open('texfuns/intensity.shader'),
-                fs.open('texfuns/interpolation/rect.shader'),
-                fs.open(`texfuns/interpolation/${name}.shader`),
-                fs.open('display.shader')
+                require(`./texfuns/tween/${fadeFun}.shader`).default,
+                require('./texfuns/intensity.shader').default,
+                require('./texfuns/interpolation/rect.shader').default,
+                require(`./texfuns/interpolation/${name}.shader`).default,
+                require('./display.shader').default
             ];
         }
 
         for (name of ['bicubicLinear', 'polynom6th', 'bicubicSmoothstep', 'bspline', 'bell', 'catmull-rom']) {
             shaders[name] = [
-                fs.open(`texfuns/tween/${fadeFun}.shader`),
-                fs.open('texfuns/intensity.shader'),
-                fs.open('texfuns/interpolation/rect.shader'),
-                fs.open(`texfuns/interpolation/${name}.shader`),
-                fs.open("texfuns/interpolation/generalBicubic.shader"),
-                fs.open('display.shader')
+                require(`./texfuns/tween/${fadeFun}.shader`).default,
+                require('./texfuns/intensity.shader').default,
+                require('./texfuns/interpolation/rect.shader').default,
+                require(`./texfuns/interpolation/${name}.shader`).default,
+                require('./texfuns/interpolation/generalBicubic.shader').default,
+                require('./display.shader').default
             ];
         }
 
@@ -255,4 +254,6 @@ const exports = (TextureVideoLayer = class TextureVideoLayer extends BaseLayer {
         this.parent.dirty = true;
         return this.shader.source(this.shaders[this.fadeFun][this.interpolationName]);
     }
-});
+}
+
+export { TextureVideoLayer as Video };

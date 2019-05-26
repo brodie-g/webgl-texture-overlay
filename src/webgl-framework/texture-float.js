@@ -32,7 +32,7 @@ const draw = function(gl, {vertex, fragment}) {
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
         throw gl.getProgramInfoLog(program);
     }
-    
+
     gl.useProgram(program);
     const vertices = new Float32Array([
          1,  1,
@@ -77,7 +77,7 @@ const renderable = function(gl, targetType, channels) {
     );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    
+
     const sourceFramebuffer = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, sourceFramebuffer);
     gl.framebufferTexture2D(
@@ -87,7 +87,7 @@ const renderable = function(gl, targetType, channels) {
         sourceTexture,
         0
     );
-    
+
     const check = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (check !== gl.FRAMEBUFFER_COMPLETE) {
         gl.deleteTexture(sourceTexture);
@@ -111,7 +111,7 @@ void main(){
     }
     );
     gl.deleteFramebuffer(sourceFramebuffer);
-    
+
     const readbackTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, readbackTexture);
     gl.texImage2D(
@@ -126,7 +126,7 @@ void main(){
     );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    
+
     const readbackFramebuffer = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, readbackFramebuffer);
     gl.framebufferTexture2D(
@@ -136,7 +136,7 @@ void main(){
         readbackTexture,
         0
     );
-   
+
     gl.bindTexture(gl.TEXTURE_2D, sourceTexture);
     draw(gl, {
         vertex: `\
@@ -172,7 +172,7 @@ void main(){
     return (pixels[0] >= 126) && (pixels[0] <= 128);
 };
 
-const exports = function(gl) {
+export default function(gl) {
     const float16 = gl.getExtension('OES_texture_half_float');
     const float16linear = gl.getExtension('OES_texture_half_float_linear');
     const float32 = gl.getExtension('OES_texture_float');

@@ -87,14 +87,12 @@ export class Shader extends ShaderObj {
         let common, fragment, vertex;
         if (typeof params === 'string') {
             [common, vertex, fragment] = Array.from(this.splitSource(params));
-        } else if (params instanceof sys.File) {
-            [common, vertex, fragment] = Array.from(this.splitSource(params.read()));
         } else if (params instanceof Array) {
             common = [];
             vertex = [];
             fragment = [];
             for (let file of Array.from(params)) {
-                const [c, v, f] = Array.from(this.splitSource(file.read()));
+                const [c, v, f] = Array.from(this.splitSource(file));
                 if (c.length > 0) { common.push(c); }
                 if (v.length > 0) { vertex.push(v); }
                 if (f.length > 0) { fragment.push(f); }

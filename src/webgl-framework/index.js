@@ -7,7 +7,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let getExtension, getSupportedExtensions, WebGLFramework;
+let getExtension, getSupportedExtensions;
 if (window.WebGLRenderingContext != null) {
     const vendors = ['WEBKIT', 'MOZ', 'MS', 'O'];
     const vendorRe = /^WEBKIT_(.*)|MOZ_(.*)|MS_(.*)|O_(.*)/;
@@ -53,18 +53,18 @@ if (window.WebGLRenderingContext != null) {
     };
 }
 
-const shims = require('./shims');
-const textureFloat = require('./texture-float');
-const texture = require('./texture');
-const matrix = require('./matrix');
-const vector = require('./vector');
+import shims from './shims';
+import textureFloat from './texture-float';
+import texture from './texture';
+import matrix from './matrix';
+import vector from './vector';
 
-const State = require('./state');
-const VertexBuffer = require('./vertexbuffer');
-const {Shader, ShaderProxy} = require('./shader');
-const framebuffer = require('./framebuffer');
+import State from './state';
+import VertexBuffer from './vertexbuffer';
+import {Shader, ShaderProxy} from './shader';
+import framebuffer from './framebuffer';
 
-const exports = (WebGLFramework = class WebGLFramework {
+export default class WebGLFramework {
     constructor(params) {
         if (params == null) { params = {}; }
         const debug = params.debug != null ? params.debug : false;
@@ -126,7 +126,7 @@ const exports = (WebGLFramework = class WebGLFramework {
             ]});
 
         this.blit = this.state({
-            shader: fs.open('blit.shader')});
+            shader: require('./blit.shader').default});
     }
 
     haveExtension(search) {
@@ -230,7 +230,7 @@ const exports = (WebGLFramework = class WebGLFramework {
         const b = parseInt(value.slice(4), 16)/255;
         return {r, g, b};
     }
-});
+}
 
 function __range__(left, right, inclusive) {
   let range = [];

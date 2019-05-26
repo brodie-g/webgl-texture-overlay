@@ -45,16 +45,27 @@ module.exports = {
 				},
 
 				test: /\.js$/
+			},
+			{
+				test: /\.(glsl|vs|fs|vert|frag|shader)$/,
+				exclude: /node_modules/,
+				use: [
+					'raw-loader',
+					'glslify-loader'
+				]
 			}
 		]
 	},
 
 	output: {
-		chunkFilename: '[name].[chunkhash].js',
-		filename: '[name].[chunkhash].js'
+		// chunkFilename: '[name].[chunkhash].js',
+		// filename: '[name].[chunkhash].js'
+        chunkFilename: '[name].js',
+        filename: '[name].js'
 	},
 
-	mode: 'production',
+	mode: 'development',
+    devtool: 'inline-source-map',
 
 	optimization: {
 		splitChunks: {

@@ -8,8 +8,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let BaseLayer;
-const exports = (BaseLayer = class BaseLayer {
+export default class BaseLayer {
     project(s, t) {
         const b = this.bounds;
         let x = b.left + ((b.right - b.left)*s);
@@ -19,7 +18,7 @@ const exports = (BaseLayer = class BaseLayer {
         ({x,y} = this.map.project({lat, lng}, 0).divideBy(256));
         return {x:x-1,y};
     }
-    
+
     tessellate(data) {
         let asc, end, i;
         let s, t, x, y;
@@ -30,7 +29,7 @@ const exports = (BaseLayer = class BaseLayer {
         const sOffset = 0.5/data.width;
         const tScale = (data.height+1)/data.height;
         const tOffset = 0.5/data.height;
-        
+
         const centroids = [];
         for (i = 0, t = i, end = size, asc = 0 <= end; asc ? i <= end : i >= end; asc ? i++ : i--, t = i) {
             var asc1, end1, j;
@@ -62,7 +61,7 @@ const exports = (BaseLayer = class BaseLayer {
                 v[o++] = p0.x; v[o++] = p0.y; v[o++]=p0.s; v[o++]=p0.t;
                 v[o++] = p1.x; v[o++] = p1.y; v[o++]=p1.s; v[o++]=p1.t;
                 v[o++] = p2.x; v[o++] = p2.y; v[o++]=p2.s; v[o++]=p2.t;
-                
+
                 v[o++] = p1.x; v[o++] = p1.y; v[o++]=p1.s; v[o++]=p1.t;
                 v[o++] = p2.x; v[o++] = p2.y; v[o++]=p2.s; v[o++]=p2.t;
                 v[o++] = p3.x; v[o++] = p3.y; v[o++]=p3.s; v[o++]=p3.t;
@@ -71,7 +70,7 @@ const exports = (BaseLayer = class BaseLayer {
 
         return this.state.vertices(v);
     }
-    
+
     setColormap(data) {
         if (data.length > 18) {
             throw new Error("Color map is too long, maximum of 18 entries allowed");
@@ -124,6 +123,6 @@ for i in [0...@texture.width]
         L.circleMarker({lat:lat, lng:lng}, {radius:1}).addTo(@map)\
 `;
     }
-});
-       
+}
+
 

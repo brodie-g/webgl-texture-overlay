@@ -14,25 +14,25 @@ const exports = (ClipRegion = class ClipRegion {
         this.gf = gf;
         this.overlay = overlay;
         this.fill = this.gf.state({
-            shader: fs.open('fill.shader'),
+            shader: require('./fill.shader').default,
             colorWrite: [false, false, false, true],
             vertexbuffer: {
                 pointers: [
                     {name:'position', size:2}
                 ]
             }});
-        
+
         this.holes = this.gf.state({
-            shader: fs.open('holes.shader'),
+            shader: require('./holes.shader').default,
             colorWrite: [false, false, false, true],
             vertexbuffer: {
                 pointers: [
                     {name:'position', size:2}
                 ]
             }});
-        
+
         this.clear = this.gf.state({
-            shader: fs.open('clear.shader'),
+            shader: require('./clear.shader').default,
             colorWrite: [false, false, false, true]});
 
         this.dirty = false;
@@ -56,7 +56,7 @@ const exports = (ClipRegion = class ClipRegion {
             .vec2('slippyBounds.southWest', southWest.x, southWest.y)
             .vec2('slippyBounds.northEast', northEast.x, northEast.y)
             .draw();
-        
+
         return this.holes
             .float('verticalSize', verticalSize)
             .float('verticalOffset', verticalOffset)
