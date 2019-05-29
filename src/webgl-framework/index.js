@@ -73,13 +73,20 @@ export default class WebGLFramework {
         const perf = params.perf != null ? params.perf : false;
         delete params.perf;
 
-        this.canvas = params.canvas != null ? params.canvas : document.createElement('canvas');
-        delete params.canvas;
+        if (!params.gl) {
+            this.canvas = params.canvas != null ? params.canvas : document.createElement('canvas');
+            delete params.canvas;
+        }
 
-        this.gl = this.getContext('webgl', params);
+        if (params.gl) {
+            this.gl = params.gl;
+            delete params.gl;
+        } else {
+            this.gl = this.getContext('webgl', params);
 
-        if ((this.gl == null)) {
-            this.gl = this.getContext('experimental-webgl');
+            if ((this.gl == null)) {
+                this.gl = this.getContext('experimental-webgl');
+            }
         }
 
         if ((this.gl == null)) {

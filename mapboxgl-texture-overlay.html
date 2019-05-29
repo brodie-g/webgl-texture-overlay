@@ -34,7 +34,7 @@
                 xhr.send();
             }
 
-            $(function(){
+            $(function() {
 
                 const options = {
                     currentLink: null,
@@ -81,8 +81,120 @@
 
                     let nav = new mapboxgl.NavigationControl();
                     map.addControl(nav, "top-left");
-                });
 
+                    // add the texture layer
+                    const overlay = new MapboxGLTextureOverlay('overlay1');
+
+                    map.addLayer(overlay);
+
+                    // add a texture layer
+                    var intensityLayer = overlay.addLayer();
+
+                    // interpolation handling
+                    var setInterpolation = function () {
+                        intensityLayer.setInterpolation(interpolationSelect.val());
+                    };
+
+                    var interpolationSelect = $('<select></select>')
+                        .appendTo('body')
+                        .css({position: 'absolute', top: 50, right: 10})
+                        .change(setInterpolation);
+
+                    for (var i = 0; i < overlay.interpolations.length; i++) {
+                        var interpolation = overlay.interpolations[i];
+                        $('<option></option>')
+                            .text(interpolation)
+                            .appendTo(interpolationSelect);
+                    }
+                    setInterpolation();
+
+                    // fade function handling
+                    var setFadeFun = function () {
+                        intensityLayer.setFadeFun(fadeFunSelect.val());
+                    };
+
+                    var fadeFunSelect = $('<select></select>')
+                        .appendTo('body')
+                        .css({position: 'absolute', top: 110, right: 10})
+                        .change(setFadeFun);
+
+                    for (var i = 0; i < overlay.fades.length; i++) {
+                        var fadeFunction = overlay.fades[i];
+                        $('<option></option>')
+                            .text(fadeFunction)
+                            .appendTo(fadeFunSelect);
+                    }
+                    setFadeFun();
+
+                    // timeHandling
+                    var setTime = function () {
+                        var t = parseFloat(time.val());
+                        intensityLayer.setTime(t);
+                    }
+
+                    var time = $('<input type="range" min="1900" max="2060" value="1900" step="0.01"></input>')
+                        .appendTo('body')
+                        .css({position: 'absolute', top: 80, right: 10, width: 300})
+                        .bind('input', setTime);
+                    setTime()
+
+                    // data handling
+                    $.getJSON('data/colors.json', function (colors) {
+                        var setColor = function () {
+                            intensityLayer.setColormap(colors[colorSelect.val()]);
+                        };
+                        var colorSelect = $('<select></select>')
+                            .appendTo('body')
+                            .css({position: 'absolute', top: 10, right: 10})
+                            .change(setColor);
+
+                        for (name in colors) {
+                            var option = $('<option></option>')
+                                .text(name)
+                                .appendTo(colorSelect);
+                        }
+                        setColor();
+
+                        var setData = function () {
+                            var dataName = dataSelect.val();
+                            var dataPath = 'data/' + dataName + '.jickle';
+
+                            $.getJICKLE(dataPath, function (data) {
+                                intensityLayer.setData({
+                                    width: data.width,
+                                    height: data.height,
+                                    bitmaps: data.bitmaps,
+                                    projection: data.projection,
+                                    bounds: {
+                                        left: data.left,
+                                        right: data.right,
+                                        top: data.top,
+                                        bottom: data.bottom
+                                    }
+                                });
+                            });
+                        };
+
+                        var dataSelect = $('<select></select>')
+                            .appendTo('body')
+                            .css({position: 'absolute', top: 30, right: 10})
+                            .change(setData);
+
+                        $('<option></option>')
+                            .text('annual-precipitation-video')
+                            .appendTo(dataSelect)
+
+                        $('<option></option>')
+                            .text('human-population-video')
+                            .appendTo(dataSelect);
+
+                        setData();
+                    });
+
+                    function addTextureLayer() {
+
+                    }
+                });
             });
         </script>
     </head>

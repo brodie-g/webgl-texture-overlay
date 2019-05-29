@@ -15,7 +15,9 @@ export default class BaseLayer {
         let y = b.top + ((b.bottom - b.top)*t);
         let [lng,lat] = Array.from(this.projection.forward([x,y]));
         lng += 360; // avoid wrapping issues
-        ({x,y} = this.map.project({lat, lng}, 0).divideBy(256));
+        ({x,y} = this.map.project({lat, lng}, 0));
+        x /= 256;
+        y /= 256;
         return {x:x-1,y};
     }
 

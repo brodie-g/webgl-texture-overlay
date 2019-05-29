@@ -149,6 +149,115 @@ class WebGLTextureOverlay {
     }
 }
 
+class MapboxGLTextureOverlay {
+    constructor(id) {
+        this.id = id;
+        this.type = 'custom';
+
+        this.layer = null;
+
+        this.dirty = false;
+        this.running = false;
+
+        this.interpolations = [
+            'nearest', 'lerp', 'smoothstep', 'euclidian', 'classicBicubic', 'hex-nearest', 'hex-linear', 'hex-smoothstep',
+            'bicubicLinear', 'polynom6th', 'bicubicSmoothstep', 'bspline', 'bell', 'catmull-rom'
+        ];
+        this.fades = ['crossfade', 'dissolve', 'noise', 'fbm'];
+    }
+
+    init(gl) {
+        this.draw = this.draw.bind(this);
+        this.gf = new WebGLFramework({
+            gl: gl,
+            premultipliedAlpha: false
+        });
+
+        requestAnimationFrame(this.draw);
+    }
+
+    onAdd(map, gl) {
+        this.init(gl);
+        this.map = map;
+        this.dirty = true;
+
+        if (this.clipRegion != null) {
+            this.clipRegion.dirty = true;
+        }
+
+        this.running = true;
+    }
+
+    render(gl, matrix) {
+        // gl.useProgram(this.layer.shader.program);
+        // gl.uniformMatrix4fv(gl.getUniformLocation(this.layer.shader.program, "u_matrix"), false, matrix);
+        // gl.bindBuffer(gl.ARRAY_BUFFER, this.layer.state.vertexbuffer.buffer);
+        // this.layer.state.setPointers();
+        //
+        // gl.enable(gl.BLEND);
+        // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        //
+        // this.layer.state
+        //gl.drawArrays(gl.TRIANGLE_STRIP, 0, 3);
+        this.draw();
+    }
+
+    draw() {
+        let dirty;
+        if (this.clipRegion != null) {
+            dirty = this.clipRegion.check() || this.dirty;
+        } else {
+            ({ dirty } = this);
+        }
+
+        if (dirty && this.running) {
+            this.dirty = false;
+            const canvas     = this.map.getCanvas();
+            const size = {x: canvas.width, y: canvas.height};
+            const bounds   = this.map.getBounds();
+
+            const sw = bounds.getSouthWest();
+            const ne = bounds.getNorthEast();
+
+            const screenNorth = this.map.latLngToContainerPoint(ne).y/size.y;
+            const screenSouth = this.map.latLngToContainerPoint(sw).y/size.y;
+
+            const southWest = this.map.project(sw, 0).divideBy(256);
+            const northEast = this.map.project(ne, 0).divideBy(256);
+
+            const verticalSize = screenSouth - screenNorth;
+            const verticalOffset = 1.0 - (screenSouth + screenNorth);
+
+            for (const layer of Array.from(this.layers)) {
+                layer.draw(southWest, northEast, verticalSize, verticalOffset);
+            }
+
+            if (this.clipRegion != null) {
+                this.clipRegion.draw(southWest, northEast, verticalSize, verticalOffset);
+            }
+        }
+
+        return requestAnimationFrame(this.draw);
+    }
+
+    setClip(region) {
+        if ((this.clipRegion == null)) {
+            this.clipRegion = new ClipRegion(this.gf, this);
+        }
+
+        return this.clipRegion.set(region);
+    }
+
+    addLayer(params) {
+        this.dirty = true;
+        const layer = new Video(this, params);
+        this.layer = layer;
+        return layer;
+    }
+}
+
+window.MapboxGLTextureOverlay = MapboxGLTextureOverlay;
+
 if (typeof L !== 'undefined') {
     L.webglTextureOverlay = function() {
         return new WebGLTextureOverlay();
