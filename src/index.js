@@ -149,6 +149,8 @@ class WebGLTextureOverlay {
     }
 }
 
-L.webglTextureOverlay = function() {
-    return new WebGLTextureOverlay();
-};
+if (typeof L !== 'undefined') {
+    L.webglTextureOverlay = function() {
+        return new WebGLTextureOverlay();
+    };
+}
