@@ -212,8 +212,8 @@ class MapboxGLTextureOverlay {
 
         if (dirty && this.running) {
             this.dirty = false;
-            const canvas     = this.map.getCanvas();
-            const size = {x: canvas.width, y: canvas.height};
+            const container = this.map.getContainer();
+            const size = {x: container.offsetWidth, y: container.offsetHeight};
             const bounds   = this.map.getBounds();
 
             const sw = bounds.getSouthWest();
