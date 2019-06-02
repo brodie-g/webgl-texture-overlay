@@ -154,7 +154,7 @@ class MapboxGLTextureOverlay {
         this.id = id;
         this.type = 'custom';
 
-        this.layer = null;
+        this.layers = [];
 
         this.dirty = false;
         this.running = false;
@@ -219,16 +219,17 @@ class MapboxGLTextureOverlay {
             const sw = bounds.getSouthWest();
             const ne = bounds.getNorthEast();
 
-            const screenNorth = this.map.latLngToContainerPoint(ne).y/size.y;
-            const screenSouth = this.map.latLngToContainerPoint(sw).y/size.y;
+            const screenNorth = this.map.project(ne).y/size.y;
+            const screenSouth = this.map.project(sw).y/size.y;
 
-            const southWest = this.map.project(sw, 0).divideBy(256);
-            const northEast = this.map.project(ne, 0).divideBy(256);
+            const southWest = this.map.project(sw, 0).div(256);
+            const northEast = this.map.project(ne, 0).div(256);
 
             const verticalSize = screenSouth - screenNorth;
             const verticalOffset = 1.0 - (screenSouth + screenNorth);
 
             for (const layer of Array.from(this.layers)) {
+                this.gf.gl.useProgram(layer.shader.program);
                 layer.draw(southWest, northEast, verticalSize, verticalOffset);
             }
 
@@ -251,7 +252,7 @@ class MapboxGLTextureOverlay {
     addLayer(params) {
         this.dirty = true;
         const layer = new Video(this, params);
-        this.layer = layer;
+        this.layers.push(layer);
         return layer;
     }
 }
