@@ -134,6 +134,7 @@
                     var setTime = function () {
                         var t = parseFloat(time.val());
                         intensityLayer.setTime(t);
+                        map.triggerRepaint();
                     }
 
                     var time = $('<input type="range" min="1900" max="2060" value="1900" step="0.01"></input>')
@@ -146,6 +147,7 @@
                     $.getJSON('data/colors.json', function (colors) {
                         var setColor = function () {
                             intensityLayer.setColormap(colors[colorSelect.val()]);
+                            map.triggerRepaint();
                         };
                         var colorSelect = $('<select></select>')
                             .appendTo('body')
