@@ -135,7 +135,7 @@ class TextureVideoLayer extends BaseLayer {
         //        min = Math.min min, value
         //        max = Math.max max, value
 
-    draw(southWest, northEast, verticalSize, verticalOffset) {
+    draw(southWest, northEast, verticalSize, verticalOffset, matrix) {
         if (this.haveData && this.haveColormap) {
             this.state
                 .float('colormap', this.colormap)
@@ -151,6 +151,12 @@ class TextureVideoLayer extends BaseLayer {
                 .float('verticalOffset', verticalOffset)
                 .vec2('slippyBounds.southWest', southWest.x, southWest.y)
                 .vec2('slippyBounds.northEast', northEast.x, northEast.y);
+
+            if (!matrix) {
+                matrix = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
+            }
+            this.state.mat4('u_matrix', matrix);
+
 
             if ((this.fadeFun === 'noise') || (this.fadeFun === 'fbm')) {
                 if (this.fadeParams != null) {
