@@ -14,15 +14,8 @@ export default class BaseLayer {
         let x = b.left + ((b.right - b.left)*s);
         let y = b.top + ((b.bottom - b.top)*t);
         let [lng,lat] = Array.from(this.projection.forward([x,y]));
-        lng += 360; // avoid wrapping issues
-        if (typeof mapboxgl !== 'undefined') {
-            ({x,y} = mapboxgl.MercatorCoordinate.fromLngLat({lat, lng}, 0));
-        } else {
-            ({x,y} = this.map.project({lat, lng}, 0));
-        }
-        x /= 256;
-        y /= 256;
-        return {x:x-1,y};
+        ({x,y} = mapboxgl.MercatorCoordinate.fromLngLat({lat, lng}, 0));
+        return {x,y};
     }
 
     tessellate(data) {

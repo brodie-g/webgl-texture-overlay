@@ -135,8 +135,11 @@ class TextureVideoLayer extends BaseLayer {
         //        min = Math.min min, value
         //        max = Math.max max, value
 
-    draw(southWest, northEast, verticalSize, verticalOffset, matrix) {
+    draw(matrix) {
         if (this.haveData && this.haveColormap) {
+            // use this layer's program
+            this.gf.gl.useProgram(this.shader.program);
+
             this.state
                 .float('colormap', this.colormap)
                 .float('mixFactor', this.mixFactor)
@@ -146,16 +149,12 @@ class TextureVideoLayer extends BaseLayer {
                 .sampler('source1', this.texture1)
                 .float('minIntensity', 0)
                 .float('maxIntensity', 255)
-                .int('colorCount', this.colorCount)
-                .float('verticalSize', verticalSize)
-                .float('verticalOffset', verticalOffset)
-                .vec2('slippyBounds.southWest', southWest.x, southWest.y)
-                .vec2('slippyBounds.northEast', northEast.x, northEast.y);
+                .int('colorCount', this.colorCount);
 
-            if (!matrix) {
-                matrix = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
+            if (matrix) {
+                this.state.mat4('u_matrix', matrix);
             }
-            this.state.mat4('u_matrix', matrix);
+
 
 
             if ((this.fadeFun === 'noise') || (this.fadeFun === 'fbm')) {

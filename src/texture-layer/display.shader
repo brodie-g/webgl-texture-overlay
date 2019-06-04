@@ -2,7 +2,6 @@ varying vec2 vTexcoord;
 
 vertex:
     attribute vec2 position, texcoord;
-    uniform float verticalSize, verticalOffset;
 
     struct SlippyBounds{
         vec2 southWest, northEast;
@@ -13,13 +12,6 @@ vertex:
     void main(){
         vTexcoord = texcoord;
         vec2 pos = position;
-
-        pos = linstepOpen(slippyBounds.southWest, slippyBounds.northEast, pos)*2.0-1.0;
-
-        pos = vec2(
-            pos.x,
-            pos.y*verticalSize + verticalOffset
-        );
 
         gl_Position = u_matrix * vec4(pos, 0, 1);
     }
