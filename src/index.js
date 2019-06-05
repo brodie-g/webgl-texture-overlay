@@ -163,6 +163,14 @@ class MapboxGLTextureOverlay {
         });
     }
 
+    destroy() {
+        if (this.layers && this.layers.length > 0) {
+            this.layers.forEach((layer) => {
+                layer.destroy();
+            });
+        }
+    }
+
     onAdd(map, gl) {
         this.init(gl);
         this.map = map;

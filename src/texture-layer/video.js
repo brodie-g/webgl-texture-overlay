@@ -76,6 +76,12 @@ class TextureVideoLayer extends BaseLayer {
         }
     }
 
+    destroy() {
+        if (this.state) {
+            this.state.destroy();
+        }
+    }
+
     getShadersFadeFun(fadeFun) {
         let name;
         const shaders = {};
