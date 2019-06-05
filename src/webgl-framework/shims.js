@@ -1,13 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS104: Avoid inline assignments
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let left;
 const vendors = [null, 'webkit', 'apple', 'moz', 'o', 'xv', 'ms', 'khtml', 'atsc', 'wap', 'prince', 'ah', 'hp', 'ro', 'rim', 'tc'];
 
@@ -28,7 +18,7 @@ const getAttribName = function(obj, name) {
         }
     }
 };
-   
+
 const getAttrib = function(obj, name, def) {
     if (obj) {
         for (let vendor of Array.from(vendors)) {
@@ -64,7 +54,7 @@ window.fullscreen = {
         let left1;
         return (left1 = getAttrib(document, 'fullScreenElement')) != null ? left1 : getAttrib(document, 'fullscreenElement');
     },
-        
+
     exit() {
         let left1, left2, left3;
         const name = (
@@ -82,7 +72,7 @@ window.fullscreen = {
             return element[name]();
         }
     },
-            
+
     addEventListener(callback) {
         const onChange = function(event) {
             event.entered = (fullscreen.element() != null);

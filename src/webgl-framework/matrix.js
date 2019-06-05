@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let Mat3, Mat4;
 const tau = Math.PI*2;
 const deg = 360/tau;
@@ -17,7 +10,7 @@ defaultExport.Mat3 = (Mat3 = class Mat3 {
         if (this.data == null) { this.data = new Float32Array(9); }
         this.identity();
     }
-    
+
     identity() {
         const d = this.data;
         d[0]  = 1; d[1]  =0; d[2] = 0;
@@ -35,7 +28,7 @@ defaultExport.Mat3 = (Mat3 = class Mat3 {
              0, -s,  c
         );
     }
-    
+
     rotatey(angle) {
         const s = Math.sin(angle*arc);
         const c = Math.cos(angle*arc);
@@ -45,7 +38,7 @@ defaultExport.Mat3 = (Mat3 = class Mat3 {
              s,  0,  c
         );
     }
-    
+
     rotatez(angle) {
         const s = Math.sin(angle*arc);
         const c = Math.cos(angle*arc);
@@ -67,23 +60,23 @@ defaultExport.Mat3 = (Mat3 = class Mat3 {
         const a00 = a[0];
         const a10 = a[1];
         const a20 = a[2];
-        
+
         const a01 = a[3];
         const a11 = a[4];
         const a21 = a[5];
-        
+
         const a02 = a[6];
         const a12 = a[7];
         const a22 = a[8];
-        
+
         a[0]  = (a00*b00) + (a01*b10) + (a02*b20);
         a[1]  = (a10*b00) + (a11*b10) + (a12*b20);
         a[2]  = (a20*b00) + (a21*b10) + (a22*b20);
-        
+
         a[3]  = (a00*b01) + (a01*b11) + (a02*b21);
         a[4]  = (a10*b01) + (a11*b11) + (a12*b21);
         a[5]  = (a20*b01) + (a21*b11) + (a22*b21);
-        
+
         a[6]  = (a00*b02) + (a01*b12) + (a02*b22);
         a[7]  = (a10*b02) + (a11*b12) + (a12*b22);
         a[8]  = (a20*b02) + (a21*b12) + (a22*b22);
@@ -98,7 +91,7 @@ defaultExport.Mat4 = (Mat4 = class Mat4 {
         if (this.data == null) { this.data = new Float32Array(16); }
         this.identity();
     }
-    
+
     identity() {
         const d = this.data;
         d[0]  = 1; d[1]  =0; d[2]  = 0; d[3]  = 0;
@@ -107,7 +100,7 @@ defaultExport.Mat4 = (Mat4 = class Mat4 {
         d[12] = 0; d[13] =0; d[14] = 0; d[15] = 1;
         return this;
     }
-    
+
     zero() {
         const d = this.data;
         d[0]  = 0; d[1]  =0; d[2]  = 0; d[3]  = 0;
@@ -116,7 +109,7 @@ defaultExport.Mat4 = (Mat4 = class Mat4 {
         d[12] = 0; d[13] =0; d[14] = 0; d[15] = 0;
         return this;
     }
-    
+
     copy(dest) {
         if (dest == null) { dest = new Mat4(); }
 
@@ -140,7 +133,7 @@ defaultExport.Mat4 = (Mat4 = class Mat4 {
         dst[15] = src[15];
         return dest;
     }
-    
+
     perspective(fov, aspect, near, far) {
         if (fov == null) { fov = 60; }
         if (aspect == null) { aspect = 1; }
@@ -169,7 +162,7 @@ defaultExport.Mat4 = (Mat4 = class Mat4 {
 
         return this;
     }
-    
+
     translate(x, y, z) {
         const d = this.data;
         const a00 = d[0]; const a01 = d[1]; const a02 = d[2]; const a03 = d[3];
@@ -183,7 +176,7 @@ defaultExport.Mat4 = (Mat4 = class Mat4 {
 
         return this;
     }
-    
+
     rotatex(angle) {
         const d = this.data;
         const rad = tau*(angle/360);
@@ -264,7 +257,7 @@ defaultExport.Mat4 = (Mat4 = class Mat4 {
 
         return this;
     }
-    
+
     invert(destination) {
         if (destination == null) { destination = this; }
         const src = this.data;
@@ -289,7 +282,7 @@ defaultExport.Mat4 = (Mat4 = class Mat4 {
         const b11 = (a22 * a33) - (a23 * a32);
 
         const d = (((((b00 * b11) - (b01 * b10)) + (b02 * b09) + (b03 * b08)) - (b04 * b07)) + (b05 * b06));
-            
+
         if (d===0) { return; }
         const invDet = 1 / d;
 
@@ -312,7 +305,7 @@ defaultExport.Mat4 = (Mat4 = class Mat4 {
 
         return destination;
     }
-    
+
     toMat3Rot(dest) {
         const dst = dest.data;
         const src = this.data;
