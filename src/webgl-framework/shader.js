@@ -54,13 +54,7 @@ vec2 linstepOpen(vec2 edge0, vec2 edge1, vec2 value){
 
 export class Shader extends ShaderObj {
     constructor(gf, params) {
-        {
-          // Hack: trick Babel/TypeScript into allowing this before super.
-          if (false) { super(); }
-          let thisFn = (() => { return this; }).toString();
-          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
-          eval(`${thisName} = this;`);
-        }
+        super();
         this.gf = gf;
         this.gl = this.gf.gl;
 
@@ -340,13 +334,7 @@ export class Shader extends ShaderObj {
 
 export class ShaderProxy extends ShaderObj {
     constructor(shader=null) {
-        {
-          // Hack: trick Babel/TypeScript into allowing this before super.
-          if (false) { super(); }
-          let thisFn = (() => { return this; }).toString();
-          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
-          eval(`${thisName} = this;`);
-        }
+        super();
         this.shader = shader;
     }
 

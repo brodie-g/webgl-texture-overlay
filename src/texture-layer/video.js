@@ -2,13 +2,7 @@ import BaseLayer from'./base';
 
 class TextureVideoLayer extends BaseLayer {
     constructor(parent, params) {
-        {
-          // Hack: trick Babel/TypeScript into allowing this before super.
-          if (false) { super(); }
-          let thisFn = (() => { return this; }).toString();
-          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
-          eval(`${thisName} = this;`);
-        }
+        super();
         this.parent = parent;
         if (params == null) { params = {}; }
         this.gf = this.parent.gf;

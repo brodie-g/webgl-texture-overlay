@@ -3,17 +3,12 @@ let defaultExport = {};
 defaultExport.Texture = (Texture = class Texture {});
 
 class ConcreteTexture extends defaultExport.Texture {
-    constructor(gf, params) {
-        {
-          // Hack: trick Babel/TypeScript into allowing this before super.
-          if (false) { super(); }
-          let thisFn = (() => { return this; }).toString();
-          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
-          eval(`${thisName} = this;`);
-        }
+    constructor(gf, params, target) {
+        super();
         this.gf = gf;
         if (params == null) { params = {}; }
         this.gl = this.gf.gl;
+        this.target = target;
         this.handle = this.gl.createTexture();
         this.channels = this.gl[(params.channels != null ? params.channels : 'rgba').toUpperCase()];
         this.bind();
@@ -123,13 +118,7 @@ class ConcreteTexture extends defaultExport.Texture {
 
 class CubeSide extends defaultExport.Texture {
     constructor(handle, target) {
-        {
-          // Hack: trick Babel/TypeScript into allowing this before super.
-          if (false) { super(); }
-          let thisFn = (() => { return this; }).toString();
-          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
-          eval(`${thisName} = this;`);
-        }
+        super();
         this.handle = handle;
         this.target = target;
     }
@@ -137,17 +126,8 @@ class CubeSide extends defaultExport.Texture {
 
 defaultExport.TextureCube = (TextureCube = class TextureCube extends ConcreteTexture {
     constructor(gf, params) {
-        {
-          // Hack: trick Babel/TypeScript into allowing this before super.
-          if (false) { super(); }
-          let thisFn = (() => { return this; }).toString();
-          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
-          eval(`${thisName} = this;`);
-        }
-        this.gf = gf;
+        super(gf, params, gf.gl.TEXTURE_CUBE_MAP);
         if (params == null) { params = {}; }
-        this.target = this.gf.gl.TEXTURE_CUBE_MAP;
-        super(this.gf, params);
         this.negativeX = new CubeSide(this.handle, this.gl.TEXTURE_CUBE_MAP_NEGATIVE_X);
         this.negativeY = new CubeSide(this.handle, this.gl.TEXTURE_CUBE_MAP_NEGATIVE_Y);
         this.negativeZ = new CubeSide(this.handle, this.gl.TEXTURE_CUBE_MAP_NEGATIVE_Z);
@@ -185,17 +165,8 @@ defaultExport.TextureCube = (TextureCube = class TextureCube extends ConcreteTex
 
 defaultExport.Texture2D = (Texture2D = class Texture2D extends ConcreteTexture {
     constructor(gf, params) {
-        {
-          // Hack: trick Babel/TypeScript into allowing this before super.
-          if (false) { super(); }
-          let thisFn = (() => { return this; }).toString();
-          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
-          eval(`${thisName} = this;`);
-        }
-        this.gf = gf;
+        super(gf, params, gf.gl.TEXTURE_2D);
         if (params == null) { params = {}; }
-        this.target = this.gf.gl.TEXTURE_2D;
-        super(this.gf, params);
 
         if (params.data instanceof Image) {
             this.dataImage(params.data);

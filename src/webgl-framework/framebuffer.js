@@ -53,16 +53,9 @@ defaultExport.Framebuffer = (Framebuffer = class Framebuffer {
 
 defaultExport.Framebuffer2D = (Framebuffer = class Framebuffer extends defaultExport.Framebuffer {
     constructor(gf, params) {
-        {
-          // Hack: trick Babel/TypeScript into allowing this before super.
-          if (false) { super(); }
-          let thisFn = (() => { return this; }).toString();
-          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
-          eval(`${thisName} = this;`);
-        }
-        this.gf = gf;
+        super(gf, params);
         if (params == null) { params = {}; }
-        super(this.gf, params);
+
         if (params.color != null) {
             if (params.color instanceof texture.Texture) {
                 this.color(params.color);
@@ -111,15 +104,7 @@ defaultExport.Framebuffer2D = (Framebuffer = class Framebuffer extends defaultEx
 
 defaultExport.FramebufferCube = (FramebufferCube = class FramebufferCube extends defaultExport.Framebuffer {
     constructor(gf, params) {
-        {
-          // Hack: trick Babel/TypeScript into allowing this before super.
-          if (false) { super(); }
-          let thisFn = (() => { return this; }).toString();
-          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
-          eval(`${thisName} = this;`);
-        }
-        this.gf = gf;
-        super(this.gf, params);
+        super(gf, params);
 
         this.negativeX = new defaultExport.Framebuffer2D(this.gf);
         this.negativeY = new defaultExport.Framebuffer2D(this.gf);
