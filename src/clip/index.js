@@ -8,8 +8,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let ClipRegion;
-const exports = (ClipRegion = class ClipRegion {
+export default class ClipRegion {
     constructor(gf, overlay) {
         this.gf = gf;
         this.overlay = overlay;
@@ -131,5 +130,4 @@ const exports = (ClipRegion = class ClipRegion {
         this.fill.vertices(this.collate(fills));
         return this.holes.vertices(this.collate(holes));
     }
-});
-        //console.log performance.now() - startTime
+};

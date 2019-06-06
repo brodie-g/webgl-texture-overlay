@@ -52,10 +52,8 @@ module.exports = {
         ]
     },
     output: {
-        // chunkFilename: '[name].[chunkhash].js',
-        // filename: '[name].[chunkhash].js'
-        chunkFilename: '[name].js',
-        filename: '[name].js'
+        chunkFilename: 'mapboxgl-texture-overlay.js',
+        filename: 'mapboxgl-texture-overlay.js'
     },
     mode: 'production',
     optimization: {

@@ -1,3 +1,4 @@
+import proj4 from 'proj4';
 import BaseLayer from'./base';
 
 class TextureVideoLayer extends BaseLayer {
