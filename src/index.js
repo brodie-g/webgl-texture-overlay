@@ -139,7 +139,8 @@ class WebGLTextureOverlay {
 }
 
 class MapboxGLTextureOverlay {
-    constructor(id) {
+    constructor(id, mapboxgl) {
+        this.mapboxgl = mapboxgl;
         this.id = id;
         this.type = 'custom';
 
