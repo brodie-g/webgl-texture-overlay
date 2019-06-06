@@ -2,25 +2,18 @@ varying vec2 vTexcoord;
 
 vertex:
     attribute vec2 position, texcoord;
-    uniform float verticalSize, verticalOffset;
-    
+
     struct SlippyBounds{
         vec2 southWest, northEast;
     };
     uniform SlippyBounds slippyBounds;
+    uniform mat4 u_matrix;
 
     void main(){
         vTexcoord = texcoord;
         vec2 pos = position;
 
-        pos = linstepOpen(slippyBounds.southWest, slippyBounds.northEast, pos)*2.0-1.0;
-
-        pos = vec2(
-            pos.x,
-            pos.y*verticalSize + verticalOffset
-        );
-
-        gl_Position = vec4(pos, 0, 1);
+        gl_Position = u_matrix * vec4(pos, 0, 1);
     }
 
 fragment:
@@ -30,13 +23,13 @@ fragment:
     uniform float minIntensity;
     uniform float maxIntensity;
     uniform int colorCount;
-                
+
     float fade(vec3 range, float value){
         return clamp(
             linstep(range.x, range.y, value) - linstep(range.y, range.z, value),
         0.0, 1.0);
     }
-    
+
     vec4 colorFun(float intensity){
         vec4 result = vec4(0.0);
         for(int i=1; i<17; i++){
@@ -57,7 +50,7 @@ fragment:
         }
         return result;
     }
-   
+
     void main(){
         float intensityScalar = texture2DInterp(vTexcoord, sourceSize).r;
         float intensity = mix(minIntensity, maxIntensity, intensityScalar);

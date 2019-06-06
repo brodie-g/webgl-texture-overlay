@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let Vec3;
 const tau = Math.PI*2;
 
@@ -24,7 +17,7 @@ defaultExport.Vec3 = (Vec3 = class Vec3 {
 
         this.x = x;
         this.z = z;
-        
+
         return this;
     }
 });

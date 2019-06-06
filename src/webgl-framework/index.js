@@ -1,12 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let getExtension, getSupportedExtensions;
 if (window.WebGLRenderingContext != null) {
     const vendors = ['WEBKIT', 'MOZ', 'MS', 'O'];
@@ -73,13 +64,20 @@ export default class WebGLFramework {
         const perf = params.perf != null ? params.perf : false;
         delete params.perf;
 
-        this.canvas = params.canvas != null ? params.canvas : document.createElement('canvas');
-        delete params.canvas;
+        if (!params.gl) {
+            this.canvas = params.canvas != null ? params.canvas : document.createElement('canvas');
+            delete params.canvas;
+        }
 
-        this.gl = this.getContext('webgl', params);
+        if (params.gl) {
+            this.gl = params.gl;
+            delete params.gl;
+        } else {
+            this.gl = this.getContext('webgl', params);
 
-        if ((this.gl == null)) {
-            this.gl = this.getContext('experimental-webgl');
+            if ((this.gl == null)) {
+                this.gl = this.getContext('experimental-webgl');
+            }
         }
 
         if ((this.gl == null)) {

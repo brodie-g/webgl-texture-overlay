@@ -1,16 +1,5 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-// import tessellate from '../lib/tessellate';
 import WebGLFramework from'./webgl-framework';
-import { Video } from'./texture-layer';
-console.log(Video);
+import { Video } from'./texture-layer'
 import ClipRegion from'./clip';
 
 
@@ -149,6 +138,98 @@ class WebGLTextureOverlay {
     }
 }
 
-L.webglTextureOverlay = function() {
-    return new WebGLTextureOverlay();
-};
+class MapboxGLTextureOverlay {
+    constructor(id) {
+        this.id = id;
+        this.type = 'custom';
+
+        this.layers = [];
+
+        this.dirty = false;
+        this.running = false;
+
+        this.interpolations = [
+            'nearest', 'lerp', 'smoothstep', 'euclidian', 'classicBicubic', 'hex-nearest', 'hex-linear', 'hex-smoothstep',
+            'bicubicLinear', 'polynom6th', 'bicubicSmoothstep', 'bspline', 'bell', 'catmull-rom'
+        ];
+        this.fades = ['crossfade', 'dissolve', 'noise', 'fbm'];
+    }
+
+    init(gl) {
+        this.draw = this.draw.bind(this);
+        this.gf = new WebGLFramework({
+            gl: gl,
+            premultipliedAlpha: false
+        });
+    }
+
+    destroy() {
+        if (this.layers && this.layers.length > 0) {
+            this.layers.forEach((layer) => {
+                layer.destroy();
+            });
+        }
+    }
+
+    onAdd(map, gl) {
+        this.init(gl);
+        this.map = map;
+        this.dirty = true;
+
+        if (this.clipRegion != null) {
+            this.clipRegion.dirty = true;
+        }
+
+        this.running = true;
+    }
+
+    render(gl, matrix) {
+        console.log('custom layer render');
+        this.draw(matrix);
+    }
+
+    draw(matrix) {
+        let dirty;
+        if (this.clipRegion != null) {
+            dirty = this.clipRegion.check() || this.dirty;
+        } else {
+            ({ dirty } = this);
+        }
+
+        if (true || this.running) {
+            this.dirty = false;
+
+            for (const layer of Array.from(this.layers)) {
+                this.gf.gl.useProgram(layer.shader.program);
+                layer.draw(matrix);
+            }
+
+            if (this.clipRegion != null) {
+                this.clipRegion.draw();
+            }
+        }
+    }
+
+    setClip(region) {
+        if ((this.clipRegion == null)) {
+            this.clipRegion = new ClipRegion(this.gf, this);
+        }
+
+        return this.clipRegion.set(region);
+    }
+
+    addLayer(params) {
+        this.dirty = true;
+        const layer = new Video(this, params);
+        this.layers.push(layer);
+        return layer;
+    }
+}
+
+window.MapboxGLTextureOverlay = MapboxGLTextureOverlay;
+
+if (typeof L !== 'undefined') {
+    L.webglTextureOverlay = function() {
+        return new WebGLTextureOverlay();
+    };
+}

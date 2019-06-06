@@ -1,13 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS001: Remove Babel/TypeScript constructor workaround
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import matrix from'./matrix';
 
 export class ShaderObj {}
@@ -64,13 +54,7 @@ vec2 linstepOpen(vec2 edge0, vec2 edge1, vec2 value){
 
 export class Shader extends ShaderObj {
     constructor(gf, params) {
-        {
-          // Hack: trick Babel/TypeScript into allowing this before super.
-          if (false) { super(); }
-          let thisFn = (() => { return this; }).toString();
-          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
-          eval(`${thisName} = this;`);
-        }
+        super();
         this.gf = gf;
         this.gl = this.gf.gl;
 
@@ -350,13 +334,7 @@ export class Shader extends ShaderObj {
 
 export class ShaderProxy extends ShaderObj {
     constructor(shader=null) {
-        {
-          // Hack: trick Babel/TypeScript into allowing this before super.
-          if (false) { super(); }
-          let thisFn = (() => { return this; }).toString();
-          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
-          eval(`${thisName} = this;`);
-        }
+        super();
         this.shader = shader;
     }
 

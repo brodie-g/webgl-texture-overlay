@@ -1,12 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS001: Remove Babel/TypeScript constructor workaround
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let Framebuffer, FramebufferCube;
 import texture from'./texture';
 
@@ -62,16 +53,9 @@ defaultExport.Framebuffer = (Framebuffer = class Framebuffer {
 
 defaultExport.Framebuffer2D = (Framebuffer = class Framebuffer extends defaultExport.Framebuffer {
     constructor(gf, params) {
-        {
-          // Hack: trick Babel/TypeScript into allowing this before super.
-          if (false) { super(); }
-          let thisFn = (() => { return this; }).toString();
-          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
-          eval(`${thisName} = this;`);
-        }
-        this.gf = gf;
+        super(gf, params);
         if (params == null) { params = {}; }
-        super(this.gf, params);
+
         if (params.color != null) {
             if (params.color instanceof texture.Texture) {
                 this.color(params.color);
@@ -120,15 +104,7 @@ defaultExport.Framebuffer2D = (Framebuffer = class Framebuffer extends defaultEx
 
 defaultExport.FramebufferCube = (FramebufferCube = class FramebufferCube extends defaultExport.Framebuffer {
     constructor(gf, params) {
-        {
-          // Hack: trick Babel/TypeScript into allowing this before super.
-          if (false) { super(); }
-          let thisFn = (() => { return this; }).toString();
-          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
-          eval(`${thisName} = this;`);
-        }
-        this.gf = gf;
-        super(this.gf, params);
+        super(gf, params);
 
         this.negativeX = new defaultExport.Framebuffer2D(this.gf);
         this.negativeY = new defaultExport.Framebuffer2D(this.gf);

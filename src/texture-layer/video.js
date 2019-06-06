@@ -1,24 +1,8 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS001: Remove Babel/TypeScript constructor workaround
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import BaseLayer from'./base';
 
 class TextureVideoLayer extends BaseLayer {
     constructor(parent, params) {
-        {
-          // Hack: trick Babel/TypeScript into allowing this before super.
-          if (false) { super(); }
-          let thisFn = (() => { return this; }).toString();
-          let thisName = thisFn.match(/return (?:_assertThisInitialized\()*(\w+)\)*;/)[1];
-          eval(`${thisName} = this;`);
-        }
+        super();
         this.parent = parent;
         if (params == null) { params = {}; }
         this.gf = this.parent.gf;
@@ -86,6 +70,12 @@ class TextureVideoLayer extends BaseLayer {
         }
     }
 
+    destroy() {
+        if (this.state) {
+            this.state.destroy();
+        }
+    }
+
     getShadersFadeFun(fadeFun) {
         let name;
         const shaders = {};
@@ -135,8 +125,11 @@ class TextureVideoLayer extends BaseLayer {
         //        min = Math.min min, value
         //        max = Math.max max, value
 
-    draw(southWest, northEast, verticalSize, verticalOffset) {
+    draw(matrix) {
         if (this.haveData && this.haveColormap) {
+            // use this layer's program
+            this.gf.gl.useProgram(this.shader.program);
+
             this.state
                 .float('colormap', this.colormap)
                 .float('mixFactor', this.mixFactor)
@@ -146,11 +139,13 @@ class TextureVideoLayer extends BaseLayer {
                 .sampler('source1', this.texture1)
                 .float('minIntensity', 0)
                 .float('maxIntensity', 255)
-                .int('colorCount', this.colorCount)
-                .float('verticalSize', verticalSize)
-                .float('verticalOffset', verticalOffset)
-                .vec2('slippyBounds.southWest', southWest.x, southWest.y)
-                .vec2('slippyBounds.northEast', northEast.x, northEast.y);
+                .int('colorCount', this.colorCount);
+
+            if (matrix) {
+                this.state.mat4('u_matrix', matrix);
+            }
+
+
 
             if ((this.fadeFun === 'noise') || (this.fadeFun === 'fbm')) {
                 if (this.fadeParams != null) {

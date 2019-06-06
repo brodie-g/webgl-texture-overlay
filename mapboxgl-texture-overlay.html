@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.js'></script>
+        <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.css' rel='stylesheet' />
+        <script>
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+        <script src="dist/main.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.3/proj4.js"></script>
+        <script src="lib/jickle.js"></script>
+
+        <style>
+            html,body{
+                height: 100%;
+                width: 100%;
+                overflow: hidden;
+                margin: 0;
+                padding: 0;
+            }
+            #map{
+                height: 100%;
+                width: 100%;
+            }
+        </style>
+        <script>
+            $.getJICKLE = function(path, onload){
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', path, true);
+                xhr.responseType = 'arraybuffer';
+                xhr.onload = function(){
+                    onload(JICKLE.parse(xhr.response));
+                };
+                xhr.send();
+            }
+
+            $(function() {
+
+                const options = {
+                    currentLink: null,
+                    activeLT: null,
+                    covID: -1,
+                    wgsCellSize: 0.2245788210298798,
+                    mapOptions: {
+                        container: "map",
+                        style: "mapbox://styles/mapbox/dark-v9",
+                        // { lat: 55.037024, lng: -125.115297 }
+                        center: [-125.115297, 55.037024],
+                        zoom: 5,
+                        maxZoom: 22
+                    },
+                    panZoom: {
+                        100: 12,
+                        200: 11,
+                        500: 10,
+                        1000: 9,
+                        2000: 8,
+                        5000: 7,
+                        10000: 6,
+                        25000: 4
+                    }
+                };
+
+                // Initiate the map instance
+                mapboxgl.accessToken =
+                    "pk.eyJ1IjoiZGNhaXJucyIsImEiOiJjanF3djl1eHYxYWE1NDNvY3J3OGt6aDZzIn0.u7LSvxuQzDTG6smQ9P3Z_g";
+                const map = new mapboxgl.Map(options.mapOptions);
+
+                // Initiate layers on load
+                map.on("load", () => {
+                    // Add a hillshade
+                    map.addSource("dem", {
+                        type: "raster-dem",
+                        url: "mapbox://mapbox.terrain-rgb"
+                    });
+                    map.addLayer({
+                        id: "hillshading",
+                        source: "dem",
+                        type: "hillshade"
+                    });
+
+                    let nav = new mapboxgl.NavigationControl();
+                    map.addControl(nav, "top-left");
+
+                    // add the texture layer
+                    const overlay = new MapboxGLTextureOverlay('overlay1');
+
+                    // $.getJSON('data/foothills.json', function(clipRegion){
+                    //     overlay.setClip(clipRegion);
+                    // });
+
+                    map.addLayer(overlay);
+
+                    // add a texture layer
+                    var intensityLayer = overlay.addLayer();
+
+                    // interpolation handling
+                    var setInterpolation = function () {
+                        intensityLayer.setInterpolation(interpolationSelect.val());
+                    };
+
+                    var interpolationSelect = $('<select></select>')
+                        .appendTo('body')
+                        .css({position: 'absolute', top: 50, right: 10})
+                        .change(setInterpolation);
+
+                    for (var i = 0; i < overlay.interpolations.length; i++) {
+                        var interpolation = overlay.interpolations[i];
+                        $('<option></option>')
+                            .text(interpolation)
+                            .appendTo(interpolationSelect);
+                    }
+                    setInterpolation();
+
+                    // fade function handling
+                    var setFadeFun = function () {
+                        intensityLayer.setFadeFun(fadeFunSelect.val());
+                    };
+
+                    var fadeFunSelect = $('<select></select>')
+                        .appendTo('body')
+                        .css({position: 'absolute', top: 110, right: 10})
+                        .change(setFadeFun);
+
+                    for (var i = 0; i < overlay.fades.length; i++) {
+                        var fadeFunction = overlay.fades[i];
+                        $('<option></option>')
+                            .text(fadeFunction)
+                            .appendTo(fadeFunSelect);
+                    }
+                    setFadeFun();
+
+                    // timeHandling
+                    var setTime = function () {
+                        var t = parseFloat(time.val());
+                        intensityLayer.setTime(t);
+                        map.triggerRepaint();
+                    }
+
+                    var time = $('<input type="range" min="1900" max="2060" value="1900" step="0.01"></input>')
+                        .appendTo('body')
+                        .css({position: 'absolute', top: 80, right: 10, width: 300})
+                        .bind('input', setTime);
+                    setTime()
+
+                    // data handling
+                    $.getJSON('data/colors.json', function (colors) {
+                        var setColor = function () {
+                            intensityLayer.setColormap(colors[colorSelect.val()]);
+                            map.triggerRepaint();
+                        };
+                        var colorSelect = $('<select></select>')
+                            .appendTo('body')
+                            .css({position: 'absolute', top: 10, right: 10})
+                            .change(setColor);
+
+                        for (name in colors) {
+                            var option = $('<option></option>')
+                                .text(name)
+                                .appendTo(colorSelect);
+                        }
+                        setColor();
+
+                        var setData = function () {
+                            var dataName = dataSelect.val();
+                            var dataPath = 'data/' + dataName + '.jickle';
+
+                            $.getJICKLE(dataPath, function (data) {
+                                intensityLayer.setData({
+                                    width: data.width,
+                                    height: data.height,
+                                    bitmaps: data.bitmaps,
+                                    projection: data.projection,
+                                    bounds: {
+                                        left: data.left,
+                                        right: data.right,
+                                        top: data.top,
+                                        bottom: data.bottom
+                                    }
+                                });
+                            });
+                        };
+
+                        var dataSelect = $('<select></select>')
+                            .appendTo('body')
+                            .css({position: 'absolute', top: 30, right: 10})
+                            .change(setData);
+
+                        $('<option></option>')
+                            .text('annual-precipitation-video')
+                            .appendTo(dataSelect)
+
+                        $('<option></option>')
+                            .text('human-population-video')
+                            .appendTo(dataSelect);
+
+                        setData();
+                    });
+
+                    function addTextureLayer() {
+
+                    }
+                });
+            });
+        </script>
+    </head>
+    <body>
+	    <div id="map"></div>
+    </body>
+</html>
