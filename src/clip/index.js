@@ -8,6 +8,8 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import tessellate from '../../lib/tessellate';
+
 export default class ClipRegion {
     constructor(gf, overlay) {
         this.gf = gf;
@@ -46,22 +48,18 @@ export default class ClipRegion {
         }
     }
 
-    draw(southWest, northEast, verticalSize, verticalOffset) {
-        this.clear.draw();
+    draw(matrix) {
+        this.clear
+            .mat4('u_matrix', matrix)
+            .draw();
 
         this.fill
-            .float('verticalSize', verticalSize)
-            .float('verticalOffset', verticalOffset)
-            .vec2('slippyBounds.southWest', southWest.x, southWest.y)
-            .vec2('slippyBounds.northEast', northEast.x, northEast.y)
+            .mat4('u_matrix', matrix)
             .draw();
-
-        return this.holes
-            .float('verticalSize', verticalSize)
-            .float('verticalOffset', verticalOffset)
-            .vec2('slippyBounds.southWest', southWest.x, southWest.y)
-            .vec2('slippyBounds.northEast', northEast.x, northEast.y)
-            .draw();
+        //
+        // return this.holes
+        //     .mat4('u_matrix', matrix)
+        //     .draw();
     }
 
     set(data) {
@@ -73,7 +71,7 @@ export default class ClipRegion {
         const result = new Float32Array(coords.length*2);
         for (let i = 0; i < coords.length; i++) {
             const item = coords[i];
-            const {x,y} = this.overlay.map.project({lat:item[1], lng:item[0]}, 0).divideBy(256);
+            const {x,y} = mapboxgl.MercatorCoordinate.fromLngLat({lat:item[1], lng:item[0]}, 0);
             result[(i*2)+0] = x;
             result[(i*2)+1] = y;
         }

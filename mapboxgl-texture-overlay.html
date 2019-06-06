@@ -146,6 +146,7 @@
                     var setClip = function(){
                         $.getJSON(clipSelect.val(), function(clipRegion){
                             overlay.setClip(clipRegion);
+                            map.triggerRepaint();
                         });
                     };
 
