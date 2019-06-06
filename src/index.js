@@ -185,7 +185,6 @@ class MapboxGLTextureOverlay {
     }
 
     render(gl, matrix) {
-        console.log('custom layer render');
         this.draw(matrix);
     }
 
