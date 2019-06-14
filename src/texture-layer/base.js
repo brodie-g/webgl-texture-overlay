@@ -4,7 +4,7 @@ export default class BaseLayer {
         let x = b.left + ((b.right - b.left)*s);
         let y = b.top + ((b.bottom - b.top)*t);
         let [lng,lat] = Array.from(this.projection.forward([x,y]));
-        ({x,y} = mapboxgl.MercatorCoordinate.fromLngLat({lat, lng}, 0));
+        ({x,y} = this.parent.mapboxgl.MercatorCoordinate.fromLngLat({lat, lng}, 0));
         return {x,y};
     }
 

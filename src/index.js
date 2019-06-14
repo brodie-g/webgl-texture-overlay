@@ -139,7 +139,8 @@ class WebGLTextureOverlay {
 }
 
 class MapboxGLTextureOverlay {
-    constructor(id) {
+    constructor(id, mapboxgl) {
+        this.mapboxgl = mapboxgl;
         this.id = id;
         this.type = 'custom';
 
@@ -184,7 +185,6 @@ class MapboxGLTextureOverlay {
     }
 
     render(gl, matrix) {
-        // console.log('custom layer render');
         this.draw(matrix);
     }
 
